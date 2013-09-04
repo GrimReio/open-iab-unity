@@ -7,9 +7,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 import com.unity3d.player.UnityPlayer;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
+import org.json.JSONTokener;
 import org.onepf.oms.OpenIabHelper;
 import org.onepf.oms.appstore.googleUtils.IabHelper;
 import org.onepf.oms.appstore.googleUtils.IabResult;
+import org.onepf.oms.appstore.googleUtils.Inventory;
 import org.onepf.oms.appstore.googleUtils.Purchase;
 
 import java.util.HashMap;
@@ -20,9 +25,12 @@ public class OpenIAB {
     private static final String EVENT_MANAGER = "OpenIABEventManager";
     private static final String BILLING_SUPPORTED_CALLBACK = "OnBillingSupported";
     private static final String BILLING_NOT_SUPPORTED_CALLBACK = "OnBillingNotSupported";
-    private static final String PURCHASE_COMPLETE_AWAITING_VERIFICATION = "OnPurchaseCompleteAwaitingVerification";
+    private static final String QUERY_INVENTORY_SUCCEEDED_CALLBACK = "OnQueryInventorySucceeded";
+    private static final String QUERY_INVENTORY_FAILED_CALLBACK = "OnQueryInventoryFailed";
     private static final String PURCHASE_SUCCEEDED_CALLBACK = "OnPurchaseSucceeded";
     private static final String PURCHASE_FAILED_CALLBACK = "OnPurchaseFailed";
+    private static final String CONSUME_PURCHASE_SUCCEEDED_CALLBACK = "OnConsumePurchaseSucceeded";
+    private static final String CONSUME_PURCHASE_FAILED_CALLBACK = "OnConsumePurchaseFailed";
 
     public static final String STORE_GOOGLE = OpenIabHelper.NAME_GOOGLE;
     public static final String STORE_AMAZON = OpenIabHelper.NAME_AMAZON;
@@ -68,9 +76,6 @@ public class OpenIAB {
                 // Hooray, IAB is fully set up. Now, let's get an inventory of stuff we own.
                 Log.d(TAG, "Setup successful. Querying inventory.");
                 UnityPlayer.UnitySendMessage(EVENT_MANAGER, BILLING_SUPPORTED_CALLBACK, "");
-
-                // TODO:
-                //_helper.queryInventoryAsync(mGotInventoryListener);
             }
         });
     }
@@ -83,29 +88,52 @@ public class OpenIAB {
         destroyBroadcasts();
     }
 
+    public void queryInventory(String[] skus) {
+        _helper.queryInventoryAsync(_gotInventoryListener);
+    }
+
     public void purchaseProduct(final String sku) {
         Log.i("OpenIAB", "Starting purchase");
         _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
-                _purchaseFinishedListener, "");
+                _purchaseFinishedListener);
     }
 
     public void purchaseProduct(final String sku, final String developerPayload) {
         Log.i("OpenIAB", "Starting purchase with payload");
         _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
-                _payloadPurchaseFinishedListener, developerPayload);
+                _purchaseFinishedListener, developerPayload);
     }
 
-    // Callback for when a purchase with payload is finished
-    IabHelper.OnIabPurchaseFinishedListener _payloadPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-            Log.d(TAG, "Purchase with payload finished: " + result + ", purchase: " + purchase);
+    public void consumeProduct(final String json) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            String itemType = jsonObject.getString("itemType");
+            String jsonPurchaseInfo = jsonObject.getString("originalJson");
+            String signature = jsonObject.getString("signature");
+            String appstoreName = jsonObject.getString("appstoreName");
+            Purchase p = new Purchase(itemType, jsonPurchaseInfo, signature, appstoreName);
+            _helper.consumeAsync(p, _consumeFinishedListener);
+        } catch (org.json.JSONException e) {
+            UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, "Invalid json");
+        }
+    }
+
+    // TODO: implement
+    public void consumeProducts(String[] sku) {
+    }
+
+    // Listener that's called when we finish querying the items and subscriptions we own
+    IabHelper.QueryInventoryFinishedListener _gotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
+        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+            Log.d(TAG, "Query inventory finished.");
             if (result.isFailure()) {
-                Log.e(TAG, "Error purchasing: " + result);
-                UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_FAILED_CALLBACK, result.getMessage());
+                UnityPlayer.UnitySendMessage(EVENT_MANAGER, QUERY_INVENTORY_FAILED_CALLBACK, result.getMessage());
                 return;
             }
-            Log.d(TAG, "Purchase complete and awaiting verification.");
-            UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_COMPLETE_AWAITING_VERIFICATION, purchase.getSku() + "|" + purchase.getDeveloperPayload());
+
+            // TODO: serialize inventory to json
+            Log.d(TAG, "Query inventory was successful.");
+            UnityPlayer.UnitySendMessage(EVENT_MANAGER, QUERY_INVENTORY_SUCCEEDED_CALLBACK, "");
         }
     };
 
@@ -123,8 +151,47 @@ public class OpenIAB {
         }
     };
 
+    // Callback for when a consumption is complete
+    IabHelper.OnConsumeFinishedListener _consumeFinishedListener = new IabHelper.OnConsumeFinishedListener() {
+        public void onConsumeFinished(Purchase purchase, IabResult result) {
+            Log.d(TAG, "Consumption finished. Purchase: " + purchase + ", result: " + result);
 
-    //TODO: how to implement automatically store specific broadcast services?
+            if (result.isFailure()) {
+                Log.e(TAG, "Error while consuming: " + result);
+                UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, result.getMessage());
+                return;
+            }
+            // TODO: serialize purchase
+            Log.d(TAG, "Consumption successful. Provisioning.");
+            String jsonPurchase;
+            try {
+                jsonPurchase = purchaseToJson(purchase);
+            } catch (JSONException e) {
+                UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, "Couldn't serialize the purchase");
+                return;
+            }
+            UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_SUCCEEDED_CALLBACK, jsonPurchase);
+        }
+    };
+
+
+    private String purchaseToJson(Purchase purchase) throws JSONException {
+        return new JSONStringer()
+                .object()
+                    .key("itemType").value(purchase.getItemType())
+                    .key("orderId").value(purchase.getOrderId())
+                    .key("packageName").value(purchase.getPackageName())
+                    .key("sku").value(purchase.getSku())
+                    .key("purchaseTime").value(purchase.getPurchaseTime())
+                    .key("purchaseState").value(purchase.getPurchaseState())
+                    .key("developerPayload").value(purchase.getDeveloperPayload())
+                    .key("token").value(purchase.getToken())
+                    .key("originalJson").value(purchase.getOriginalJson())
+                    .key("signature").value(purchase.getSignature())
+                    .key("appstoreName").value(purchase.getAppstoreName())
+                .endObject()
+                .toString();
+    }
 
     private void createBroadcasts() {
         Log.d(TAG, "createBroadcasts");

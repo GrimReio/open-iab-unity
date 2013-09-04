@@ -29,17 +29,23 @@ public class OpenIABGame : MonoBehaviour {
     private void OnEnable() {
         OpenIABEventManager.billingSupportedEvent += OnBillingSupported;
         OpenIABEventManager.billingNotSupportedEvent += OnBillingNotSupported;
-        OpenIABEventManager.purchaseCompleteAwaitingVerificationEvent += OnPurchaseCompleteAwaitingVerification;
+        OpenIABEventManager.queryInventorySucceededEvent += OnQueryInventorySucceeded;
+        OpenIABEventManager.queryInventoryFailedEvent += OnQueryInventoryFailed;
         OpenIABEventManager.purchaseSucceededEvent += OnPurchaseSucceded;
         OpenIABEventManager.purchaseFailedEvent += OnPurchaseFailed;
+        OpenIABEventManager.consumePurchaseSucceededEvent += OnConsumePurchaseSucceeded;
+        OpenIABEventManager.consumePurchaseFailedEvent += OnConsumePurchaseFailed;
     }
 
     private void OnDisable() {
         OpenIABEventManager.billingSupportedEvent -= OnBillingSupported;
         OpenIABEventManager.billingNotSupportedEvent -= OnBillingNotSupported;
-        OpenIABEventManager.purchaseCompleteAwaitingVerificationEvent -= OnPurchaseCompleteAwaitingVerification;
+        OpenIABEventManager.queryInventorySucceededEvent -= OnQueryInventorySucceeded;
+        OpenIABEventManager.queryInventoryFailedEvent -= OnQueryInventoryFailed;
         OpenIABEventManager.purchaseSucceededEvent -= OnPurchaseSucceded;
         OpenIABEventManager.purchaseFailedEvent -= OnPurchaseFailed;
+        OpenIABEventManager.consumePurchaseSucceededEvent -= OnConsumePurchaseSucceeded;
+        OpenIABEventManager.consumePurchaseFailedEvent -= OnConsumePurchaseFailed;
     }
 
     // Verifies the developer payload of a purchase.
@@ -69,26 +75,29 @@ public class OpenIABGame : MonoBehaviour {
         return true;
     }
 
-    private void OnPurchaseCompleteAwaitingVerification(string sku, string developerPayload) {
-        Debug.Log("Purchase complete and awaiting verification: " + sku + "; Payload: " + developerPayload);
-        if (!VerifyDeveloperPayload(developerPayload)) {
-            return;
-        }
-        switch (sku) {
-            case SKU_GAS:
-                _tank += 1;
-                SaveData();
-                break;
-        }
-        _processingPayment = false;
+    private void OnBillingSupported() {
+        Debug.Log("Billing is supported");
     }
 
-    private void OnPurchaseSucceded(string sku) {
-        Debug.Log("Purchase succeded: " + sku);
-        switch (sku) {
+    private void OnBillingNotSupported(string error) {
+        Debug.Log("Query inventory succeeded: " + error);
+    }
+
+    private void OnQueryInventorySucceeded(List<InAppPurchase> purchases, List<SkuDetails> skus) {
+
+    }
+
+    private void OnQueryInventoryFailed(string error) {
+        Debug.Log("Query inventory failed: " + error);
+    }
+    private void OnPurchaseSucceded(InAppPurchase purchase) {
+        Debug.Log("Purchase complete: " + purchase.Sku + "; Payload: " + purchase.DeveloperPayload);
+        if (!VerifyDeveloperPayload(purchase.DeveloperPayload)) {
+            return;
+        }
+        switch (purchase.Sku) {
             case SKU_GAS:
-                _tank += 1;
-                SaveData();
+                OpenIAB.consumeProduct(purchase);
                 break;
         }
         _processingPayment = false;
@@ -99,12 +108,17 @@ public class OpenIABGame : MonoBehaviour {
         _processingPayment = false;
     }
 
-    private void OnBillingSupported() {
-        Debug.Log("Billing is supported");
+    private void OnConsumePurchaseSucceeded(InAppPurchase purchase) {
+        Debug.Log("Consume purchase succeded: " + purchase.ToString());
+        // TODO: implement SKU check if needed
+        _tank = _tank == TANK_MAX ? TANK_MAX : _tank + 1;
+        SaveData();
+        _processingPayment = false;
     }
 
-    private void OnBillingNotSupported(string error) {
-        Debug.Log("Billing not supported: " + error);
+    private void OnConsumePurchaseFailed(string error) {
+        Debug.Log("Consume purchase failed: " + error);
+        _processingPayment = false;
     }
 
     private void OnGUI() {

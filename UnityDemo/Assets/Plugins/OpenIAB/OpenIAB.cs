@@ -63,6 +63,19 @@ public class OpenIAB {
         }
     }
 
+    // Unbinds and shuts down the billing service
+    public static void unbindService() {
+        if (Application.platform != RuntimePlatform.Android) {
+            return;
+        }
+        _plugin.Call("unbindService");
+    }
+
+    // Sends a request to get all completed purchases and product information
+    public static void queryInventory(string[] skus) {
+        //_plugin.Call("queryInventory");
+    }
+
     // Purchases the product with the given productId
     public static void purchaseProduct(string sku) {
         if (Application.platform != RuntimePlatform.Android) {
@@ -75,18 +88,21 @@ public class OpenIAB {
     // Purchases the product with the given productId and developerPayload
     public static void purchaseProduct(string sku, string developerPayload) {
         if (Application.platform != RuntimePlatform.Android) {
-            OpenIABEventManager.SendMessage("OnPurchaseCompleteAwaitingVerification", String.Join("|", new string[] {sku, developerPayload}));
+            // TODO: implement editor purchase simulation
+            // OpenIABEventManager.SendMessage("OnPurchaseSucceeded", "json");
             return;
         }
         _plugin.Call("purchaseProduct", sku, developerPayload);
     }
 
-    // Unbinds and shuts down the billing service
-    public static void unbindService() {
+    // Sends out a request to consume the product
+    public static void consumeProduct(InAppPurchase purchase) {
         if (Application.platform != RuntimePlatform.Android) {
+            // TODO: implement editor purchase simulation
+            // OpenIABEventManager.SendMessage("OnConsumePurchaseSucceeded", "json");
             return;
         }
-        _plugin.Call("unbindService");
+        _plugin.Call("consumeProduct", purchase.Serialize());
     }
 }
 #endif // UNITY_ANDROID

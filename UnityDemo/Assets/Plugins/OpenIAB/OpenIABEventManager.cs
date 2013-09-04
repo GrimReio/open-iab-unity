@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class OpenIABEventManager : MonoBehaviour {
 #if UNITY_ANDROID
@@ -8,12 +9,18 @@ public class OpenIABEventManager : MonoBehaviour {
     public static event Action billingSupportedEvent;
     // Fired after init is called when billing is not supported on the device
     public static event Action<string> billingNotSupportedEvent;
-    // Fired when a purchase completes allowing you to verify the signature on an external server if you would like
-    public static event Action<string, string> purchaseCompleteAwaitingVerificationEvent;
+    // Fired when the inventory and purchase history query has returned
+    public static event Action<List<InAppPurchase>,List<SkuDetails>> queryInventorySucceededEvent;
+    // Fired when the inventory and purchase history query fails
+    public static event Action<string> queryInventoryFailedEvent;
     // Fired when a purchase succeeds
-    public static event Action<string> purchaseSucceededEvent;
+    public static event Action<InAppPurchase> purchaseSucceededEvent;
     // Fired when a purchase fails
     public static event Action<string> purchaseFailedEvent;
+    // Fired when a call to consume a product succeeds
+    public static event Action<InAppPurchase> consumePurchaseSucceededEvent;
+    // Fired when a call to consume a product fails
+    public static event Action<string> consumePurchaseFailedEvent;
 
     private void Awake() {
         // Set the GameObject name to the class name for easy access from native plugin
@@ -25,29 +32,41 @@ public class OpenIABEventManager : MonoBehaviour {
         if (billingSupportedEvent != null)
             billingSupportedEvent();
     }
+
     private void OnBillingNotSupported(string error) {
         if (billingNotSupportedEvent != null)
             billingNotSupportedEvent(error);
     }
-    private void OnPurchaseCompleteAwaitingVerification(string skuAndPayload) {
-        string[] tokens = skuAndPayload.Split('|');
-        if (tokens.Length < 2) {
-            if (purchaseFailedEvent != null) {
-                purchaseFailedEvent("Invalid developer payload");
-            }
-            return;
-        }
-        if (purchaseCompleteAwaitingVerificationEvent != null) {
-            purchaseCompleteAwaitingVerificationEvent(tokens[0], tokens[1]);
-        }
+
+    // TODO: parse json
+    private void OnQueryInventorySucceeded(string json) {
+        if (queryInventorySucceededEvent != null)
+            queryInventorySucceededEvent(null, null);
     }
-    private void OnPurchaseSucceeded(string sku) {
+
+    private void OnQueryInventoryFailed(string error) {
+        if (queryInventoryFailedEvent != null)
+            queryInventoryFailedEvent(error);
+    }
+
+    private void OnPurchaseSucceeded(string json) {
         if (purchaseSucceededEvent != null)
-            purchaseSucceededEvent(sku);
+            purchaseSucceededEvent(new InAppPurchase(json));
     }
+
     private void OnPurchaseFailed(string error) {
         if (purchaseFailedEvent != null)
             purchaseFailedEvent(error);
+    }
+
+    private void OnConsumePurchaseSucceeded(string json) {
+        if (consumePurchaseSucceededEvent != null)
+            consumePurchaseSucceededEvent(new InAppPurchase(json));
+    }
+
+    private void OnConsumePurchaseFailed(string error) {
+        if (consumePurchaseFailedEvent != null)
+            consumePurchaseFailedEvent(error);
     }
 #else
     private void Awake() {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.unity3d.player"
+    package="com.openiab.game"
 	android:installLocation="preferExternal"
 	android:theme="@android:style/Theme.NoTitleBar"
     android:versionCode="1"
@@ -38,4 +38,8 @@
       <meta-data android:name="unityplayer.ForwardNativeEventsToDalvik" android:value="false" />
     </activity>
   </application>
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="com.android.vending.BILLING" />
+  <uses-permission android:name="com.tmoney.vending.INBILLING"/>
+  <uses-permission android:name="com.yandex.store.permission.BILLING" />
 </manifest>
