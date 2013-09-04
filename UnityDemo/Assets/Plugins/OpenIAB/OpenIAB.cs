@@ -64,12 +64,29 @@ public class OpenIAB {
     }
 
     // Purchases the product with the given productId
-    public static void purchase(string productId) {
+    public static void purchaseProduct(string sku) {
         if (Application.platform != RuntimePlatform.Android) {
-            OpenIABEventManager.SendMessage("OnPurchaseSucceeded", productId);
+            OpenIABEventManager.SendMessage("OnPurchaseSucceeded", sku);
             return;
         }
-        _plugin.Call("purchase", productId);
+        _plugin.Call("purchaseProduct", sku);
+    }
+    
+    // Purchases the product with the given productId and developerPayload
+    public static void purchaseProduct(string sku, string developerPayload) {
+        if (Application.platform != RuntimePlatform.Android) {
+            OpenIABEventManager.SendMessage("OnPurchaseCompleteAwaitingVerification", String.Join("|", new string[] {sku, developerPayload}));
+            return;
+        }
+        _plugin.Call("purchaseProduct", sku, developerPayload);
+    }
+
+    // Unbinds and shuts down the billing service
+    public static void unbindService() {
+        if (Application.platform != RuntimePlatform.Android) {
+            return;
+        }
+        _plugin.Call("unbindService");
     }
 }
 #endif // UNITY_ANDROID

@@ -20,6 +20,7 @@ public class OpenIAB {
     private static final String EVENT_MANAGER = "OpenIABEventManager";
     private static final String BILLING_SUPPORTED_CALLBACK = "OnBillingSupported";
     private static final String BILLING_NOT_SUPPORTED_CALLBACK = "OnBillingNotSupported";
+    private static final String PURCHASE_COMPLETE_AWAITING_VERIFICATION = "OnPurchaseCompleteAwaitingVerification";
     private static final String PURCHASE_SUCCEEDED_CALLBACK = "OnPurchaseSucceeded";
     private static final String PURCHASE_FAILED_CALLBACK = "OnPurchaseFailed";
 
@@ -74,28 +75,39 @@ public class OpenIAB {
         });
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
+    public void unbindService() {
+        if (_helper != null) {
+            _helper.dispose();
+            _helper = null;
+        }
         destroyBroadcasts();
     }
 
-    public void purchase(final String productId) {
+    public void purchaseProduct(final String sku) {
         Log.i("OpenIAB", "Starting purchase");
-        /* TODO: for security, generate your payload here for verification. See the comments on
-         *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-         *        an empty string, but on a production app you should carefully generate this. */
-        String payload = "";
-
-        _helper.launchPurchaseFlow(UnityPlayer.currentActivity, productId, RC_REQUEST,
-                _purchaseFinishedListener, payload);
+        _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
+                _purchaseFinishedListener, "");
     }
 
-    // TODO:
-    boolean verifyDeveloperPayload(Purchase p) {
-        String payload = p.getDeveloperPayload();
-        return true;
+    public void purchaseProduct(final String sku, final String developerPayload) {
+        Log.i("OpenIAB", "Starting purchase with payload");
+        _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
+                _payloadPurchaseFinishedListener, developerPayload);
     }
+
+    // Callback for when a purchase with payload is finished
+    IabHelper.OnIabPurchaseFinishedListener _payloadPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+            Log.d(TAG, "Purchase with payload finished: " + result + ", purchase: " + purchase);
+            if (result.isFailure()) {
+                Log.e(TAG, "Error purchasing: " + result);
+                UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_FAILED_CALLBACK, result.getMessage());
+                return;
+            }
+            Log.d(TAG, "Purchase complete and awaiting verification.");
+            UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_COMPLETE_AWAITING_VERIFICATION, purchase.getSku() + "|" + purchase.getDeveloperPayload());
+        }
+    };
 
     // Callback for when a purchase is finished
     IabHelper.OnIabPurchaseFinishedListener _purchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
@@ -106,12 +118,6 @@ public class OpenIAB {
                 UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_FAILED_CALLBACK, result.getMessage());
                 return;
             }
-            if (!verifyDeveloperPayload(purchase)) {
-                Log.e(TAG, "Error purchasing. Authenticity verification failed.");
-                UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_FAILED_CALLBACK, "Authenticity verification failed.");
-                return;
-            }
-
             Log.d(TAG, "Purchase successful.");
             UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_SUCCEEDED_CALLBACK, purchase.getSku());
         }

@@ -8,6 +8,8 @@ public class OpenIABEventManager : MonoBehaviour {
     public static event Action billingSupportedEvent;
     // Fired after init is called when billing is not supported on the device
     public static event Action<string> billingNotSupportedEvent;
+    // Fired when a purchase completes allowing you to verify the signature on an external server if you would like
+    public static event Action<string, string> purchaseCompleteAwaitingVerificationEvent;
     // Fired when a purchase succeeds
     public static event Action<string> purchaseSucceededEvent;
     // Fired when a purchase fails
@@ -27,9 +29,21 @@ public class OpenIABEventManager : MonoBehaviour {
         if (billingNotSupportedEvent != null)
             billingNotSupportedEvent(error);
     }
-    private void OnPurchaseSucceeded(string productId) {
+    private void OnPurchaseCompleteAwaitingVerification(string skuAndPayload) {
+        string[] tokens = skuAndPayload.Split('|');
+        if (tokens.Length < 2) {
+            if (purchaseFailedEvent != null) {
+                purchaseFailedEvent("Invalid developer payload");
+            }
+            return;
+        }
+        if (purchaseCompleteAwaitingVerificationEvent != null) {
+            purchaseCompleteAwaitingVerificationEvent(tokens[0], tokens[1]);
+        }
+    }
+    private void OnPurchaseSucceeded(string sku) {
         if (purchaseSucceededEvent != null)
-            purchaseSucceededEvent(productId);
+            purchaseSucceededEvent(sku);
     }
     private void OnPurchaseFailed(string error) {
         if (purchaseFailedEvent != null)

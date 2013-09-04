@@ -20,4 +20,9 @@ public class BillingActivity extends UnityPlayerActivity {
             Log.d(OpenIAB.TAG, "onActivityResult handled by IABUtil.");
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        OpenIAB.instance().unbindService();
+    }
 } 
