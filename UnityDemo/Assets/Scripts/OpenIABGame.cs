@@ -25,6 +25,17 @@ public class OpenIABGame : MonoBehaviour {
     [SerializeField]
     Car _car = null;
 
+    private void Awake() {
+        OpenIABEventManager.billingSupportedEvent += OnBillingSupported;
+        OpenIABEventManager.billingNotSupportedEvent += OnBillingNotSupported;
+        OpenIABEventManager.queryInventorySucceededEvent += OnQueryInventorySucceeded;
+        OpenIABEventManager.queryInventoryFailedEvent += OnQueryInventoryFailed;
+        OpenIABEventManager.purchaseSucceededEvent += OnPurchaseSucceded;
+        OpenIABEventManager.purchaseFailedEvent += OnPurchaseFailed;
+        OpenIABEventManager.consumePurchaseSucceededEvent += OnConsumePurchaseSucceeded;
+        OpenIABEventManager.consumePurchaseFailedEvent += OnConsumePurchaseFailed;
+    }
+
     private void Start() {
         LoadData();
         OpenIAB.init(new Dictionary<string, string> {
@@ -36,18 +47,7 @@ public class OpenIABGame : MonoBehaviour {
         });
     }
 
-    private void OnEnable() {
-        OpenIABEventManager.billingSupportedEvent += OnBillingSupported;
-        OpenIABEventManager.billingNotSupportedEvent += OnBillingNotSupported;
-        OpenIABEventManager.queryInventorySucceededEvent += OnQueryInventorySucceeded;
-        OpenIABEventManager.queryInventoryFailedEvent += OnQueryInventoryFailed;
-        OpenIABEventManager.purchaseSucceededEvent += OnPurchaseSucceded;
-        OpenIABEventManager.purchaseFailedEvent += OnPurchaseFailed;
-        OpenIABEventManager.consumePurchaseSucceededEvent += OnConsumePurchaseSucceeded;
-        OpenIABEventManager.consumePurchaseFailedEvent += OnConsumePurchaseFailed;
-    }
-
-    private void OnDisable() {
+    private void OnDestroy() {
         OpenIABEventManager.billingSupportedEvent -= OnBillingSupported;
         OpenIABEventManager.billingNotSupportedEvent -= OnBillingNotSupported;
         OpenIABEventManager.queryInventorySucceededEvent -= OnQueryInventorySucceeded;
