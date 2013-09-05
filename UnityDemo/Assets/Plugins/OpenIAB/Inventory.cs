@@ -45,6 +45,9 @@ namespace OpenIabPlugin {
          * Returns the listing details for an in-app product.
          */
         public SkuDetails GetSkuDetails(string sku) {
+            if (!_skuMap.ContainsKey(sku)) {
+                return null;
+            }
             return _skuMap[sku];
         }
 
@@ -52,6 +55,9 @@ namespace OpenIabPlugin {
          * Returns purchase information for a given product, or null if there is no purchase.
          */
         public Purchase GetPurchase(string sku) {
+            if (!_purchaseMap.ContainsKey(sku)) {
+                return null;
+            }
             return _purchaseMap[sku];
         }
 
