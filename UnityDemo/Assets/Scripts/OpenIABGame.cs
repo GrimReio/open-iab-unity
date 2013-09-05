@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using OpenIabPlugin;
 
 public class OpenIABGame : MonoBehaviour {
 #if UNITY_ANDROID
@@ -77,20 +78,21 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnBillingSupported() {
         Debug.Log("Billing is supported");
+        OpenIAB.queryInventory(new string[] { SKU_GAS });
     }
 
     private void OnBillingNotSupported(string error) {
         Debug.Log("Query inventory succeeded: " + error);
     }
 
-    private void OnQueryInventorySucceeded(List<InAppPurchase> purchases, List<SkuDetails> skus) {
+    private void OnQueryInventorySucceeded(Inventory inventory) {
 
     }
 
     private void OnQueryInventoryFailed(string error) {
         Debug.Log("Query inventory failed: " + error);
     }
-    private void OnPurchaseSucceded(InAppPurchase purchase) {
+    private void OnPurchaseSucceded(Purchase purchase) {
         Debug.Log("Purchase complete: " + purchase.Sku + "; Payload: " + purchase.DeveloperPayload);
         if (!VerifyDeveloperPayload(purchase.DeveloperPayload)) {
             return;
@@ -108,7 +110,7 @@ public class OpenIABGame : MonoBehaviour {
         _processingPayment = false;
     }
 
-    private void OnConsumePurchaseSucceeded(InAppPurchase purchase) {
+    private void OnConsumePurchaseSucceeded(Purchase purchase) {
         Debug.Log("Consume purchase succeded: " + purchase.ToString());
         // TODO: implement SKU check if needed
         _tank = _tank == TANK_MAX ? TANK_MAX : _tank + 1;

@@ -10,7 +10,6 @@ import com.unity3d.player.UnityPlayer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
-import org.json.JSONTokener;
 import org.onepf.oms.OpenIabHelper;
 import org.onepf.oms.appstore.googleUtils.IabHelper;
 import org.onepf.oms.appstore.googleUtils.IabResult;
@@ -89,7 +88,8 @@ public class OpenIAB {
     }
 
     public void queryInventory(String[] skus) {
-        _helper.queryInventoryAsync(_gotInventoryListener);
+        Log.i(TAG, skus.length + "");
+        _helper.queryInventoryAsync(_queryInventoryListener);
     }
 
     public void purchaseProduct(final String sku) {
@@ -123,7 +123,7 @@ public class OpenIAB {
     }
 
     // Listener that's called when we finish querying the items and subscriptions we own
-    IabHelper.QueryInventoryFinishedListener _gotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
+    IabHelper.QueryInventoryFinishedListener _queryInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
         public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
             Log.d(TAG, "Query inventory finished.");
             if (result.isFailure()) {

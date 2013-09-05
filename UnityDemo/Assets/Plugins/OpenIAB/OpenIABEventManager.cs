@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using OpenIabPlugin;
 
 public class OpenIABEventManager : MonoBehaviour {
 #if UNITY_ANDROID
@@ -10,15 +11,15 @@ public class OpenIABEventManager : MonoBehaviour {
     // Fired after init is called when billing is not supported on the device
     public static event Action<string> billingNotSupportedEvent;
     // Fired when the inventory and purchase history query has returned
-    public static event Action<List<InAppPurchase>,List<SkuDetails>> queryInventorySucceededEvent;
+    public static event Action<Inventory> queryInventorySucceededEvent;
     // Fired when the inventory and purchase history query fails
     public static event Action<string> queryInventoryFailedEvent;
     // Fired when a purchase succeeds
-    public static event Action<InAppPurchase> purchaseSucceededEvent;
+    public static event Action<Purchase> purchaseSucceededEvent;
     // Fired when a purchase fails
     public static event Action<string> purchaseFailedEvent;
     // Fired when a call to consume a product succeeds
-    public static event Action<InAppPurchase> consumePurchaseSucceededEvent;
+    public static event Action<Purchase> consumePurchaseSucceededEvent;
     // Fired when a call to consume a product fails
     public static event Action<string> consumePurchaseFailedEvent;
 
@@ -40,8 +41,10 @@ public class OpenIABEventManager : MonoBehaviour {
 
     // TODO: parse json
     private void OnQueryInventorySucceeded(string json) {
-        if (queryInventorySucceededEvent != null)
-            queryInventorySucceededEvent(null, null);
+        if (queryInventorySucceededEvent != null) {
+            Inventory inventory = new Inventory(json);
+            queryInventorySucceededEvent(inventory);
+        }
     }
 
     private void OnQueryInventoryFailed(string error) {
@@ -51,7 +54,7 @@ public class OpenIABEventManager : MonoBehaviour {
 
     private void OnPurchaseSucceeded(string json) {
         if (purchaseSucceededEvent != null)
-            purchaseSucceededEvent(new InAppPurchase(json));
+            purchaseSucceededEvent(new Purchase(json));
     }
 
     private void OnPurchaseFailed(string error) {
@@ -61,7 +64,7 @@ public class OpenIABEventManager : MonoBehaviour {
 
     private void OnConsumePurchaseSucceeded(string json) {
         if (consumePurchaseSucceededEvent != null)
-            consumePurchaseSucceededEvent(new InAppPurchase(json));
+            consumePurchaseSucceededEvent(new Purchase(json));
     }
 
     private void OnConsumePurchaseFailed(string error) {
