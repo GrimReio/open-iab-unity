@@ -11,10 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.onepf.oms.OpenIabHelper;
-import org.onepf.oms.appstore.googleUtils.IabHelper;
-import org.onepf.oms.appstore.googleUtils.IabResult;
-import org.onepf.oms.appstore.googleUtils.Inventory;
-import org.onepf.oms.appstore.googleUtils.Purchase;
+import org.onepf.oms.appstore.googleUtils.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -115,17 +112,22 @@ public class OpenIAB {
     }
 
     public void consumeProduct(final String json) {
-        try {
-            JSONObject jsonObject = new JSONObject(json);
-            String itemType = jsonObject.getString("itemType");
-            String jsonPurchaseInfo = jsonObject.getString("originalJson");
-            String signature = jsonObject.getString("signature");
-            String appstoreName = jsonObject.getString("appstoreName");
-            Purchase p = new Purchase(itemType, jsonPurchaseInfo, signature, appstoreName);
-            _helper.consumeAsync(p, _consumeFinishedListener);
-        } catch (org.json.JSONException e) {
-            UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, "Invalid json");
-        }
+        UnityPlayer.currentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject jsonObject = new JSONObject(json);
+                    String itemType = jsonObject.getString("itemType");
+                    String jsonPurchaseInfo = jsonObject.getString("originalJson");
+                    String signature = jsonObject.getString("signature");
+                    String appstoreName = jsonObject.getString("appstoreName");
+                    Purchase p = new Purchase(itemType, jsonPurchaseInfo, signature, appstoreName);
+                    _helper.consumeAsync(p, _consumeFinishedListener);
+                } catch (org.json.JSONException e) {
+                    UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, "Invalid json");
+                }
+            }
+        });
     }
 
     // TODO: implement
@@ -163,7 +165,14 @@ public class OpenIAB {
                 return;
             }
             Log.d(TAG, "Purchase successful.");
-            UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_SUCCEEDED_CALLBACK, purchase.getSku());
+            String jsonPurchase;
+            try {
+                jsonPurchase = purchaseToJson(purchase);
+            } catch (JSONException e) {
+                UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_FAILED_CALLBACK, "Couldn't serialize the purchase");
+                return;
+            }
+            UnityPlayer.UnitySendMessage(EVENT_MANAGER, PURCHASE_SUCCEEDED_CALLBACK, jsonPurchase);
         }
     };
 
@@ -177,7 +186,6 @@ public class OpenIAB {
                 UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, result.getMessage());
                 return;
             }
-            // TODO: serialize purchase
             Log.d(TAG, "Consumption successful. Provisioning.");
             String jsonPurchase;
             try {
@@ -193,6 +201,7 @@ public class OpenIAB {
 
     private String inventoryToJson(Inventory inventory) throws JSONException {
         JSONStringer json = new JSONStringer().object();
+
         json.key("purchaseMap").array();
         for (Map.Entry<String, Purchase> entry : inventory.mPurchaseMap.entrySet()) {
             json.array();
@@ -200,13 +209,23 @@ public class OpenIAB {
             json.value(purchaseToJson(entry.getValue()));
             json.endArray();
         }
-        json.endArray().endObject();
+        json.endArray();
+
+        json.key("skuMap").array();
+        for (Map.Entry<String, SkuDetails> entry : inventory.mSkuMap.entrySet()) {
+            json.array();
+            json.value(entry.getKey());
+            json.value(skuDetailsToJson(entry.getValue()));
+            json.endArray();
+        }
+        json.endArray();
+
+        json.endObject();
         return json.toString();
     }
 
     private String purchaseToJson(Purchase purchase) throws JSONException {
-        return new JSONStringer()
-                .object()
+        return new JSONStringer().object()
                 .key("itemType").value(purchase.getItemType())
                 .key("orderId").value(purchase.getOrderId())
                 .key("packageName").value(purchase.getPackageName())
@@ -218,8 +237,19 @@ public class OpenIAB {
                 .key("originalJson").value(purchase.getOriginalJson())
                 .key("signature").value(purchase.getSignature())
                 .key("appstoreName").value(purchase.getAppstoreName())
-                .endObject()
-                .toString();
+                .endObject().toString();
+    }
+
+    private String skuDetailsToJson(SkuDetails skuDetails) throws JSONException {
+        return new JSONStringer().object()
+                .key("itemType").value(skuDetails.getItemType())
+                .key("sku").value(skuDetails.getSku())
+                .key("type").value(skuDetails.getType())
+                .key("price").value(skuDetails.getPrice())
+                .key("title").value(skuDetails.getTitle())
+                .key("description").value(skuDetails.getDescription())
+                .key("json").value(skuDetails.getJson())
+                .endObject().toString();
     }
 
     private void createBroadcasts() {

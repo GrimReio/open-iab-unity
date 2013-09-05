@@ -87,13 +87,37 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnQueryInventorySucceeded(Inventory inventory) {
         Debug.Log("Query inventory succeeded: " + inventory);
+        /*
+        * Check for items we own. Notice that for each purchase, we check
+        * the developer payload to see if it's correct! See
+        * verifyDeveloperPayload().
+        */
+        //// Do we have the premium upgrade?
+        //Purchase premiumPurchase = inventory.getPurchase(SKU_PREMIUM);
+        //mIsPremium = (premiumPurchase != null && verifyDeveloperPayload(premiumPurchase));
+        //Log.d(TAG, "User is " + (mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
+
+        //// Do we have the infinite gas plan?
+        //Purchase infiniteGasPurchase = inventory.getPurchase(SKU_INFINITE_GAS);
+        //mSubscribedToInfiniteGas = (infiniteGasPurchase != null && 
+        //            verifyDeveloperPayload(infiniteGasPurchase));
+        //Log.d(TAG, "User " + (mSubscribedToInfiniteGas ? "HAS" : "DOES NOT HAVE") 
+        //                + " infinite gas subscription.");
+        //if (mSubscribedToInfiniteGas) mTank = TANK_MAX;
+
+        // Check for gas delivery -- if we own gas, we should fill up the tank immediately
+        Purchase gasPurchase = inventory.GetPurchase(SKU_GAS);
+        if (gasPurchase != null && VerifyDeveloperPayload(gasPurchase.DeveloperPayload)) {
+            Debug.Log("We have gas. Consuming it.");
+            OpenIAB.consumeProduct(inventory.GetPurchase(SKU_GAS));
+        }
     }
 
     private void OnQueryInventoryFailed(string error) {
         Debug.Log("Query inventory failed: " + error);
     }
     private void OnPurchaseSucceded(Purchase purchase) {
-        Debug.Log("Purchase complete: " + purchase.Sku + "; Payload: " + purchase.DeveloperPayload);
+        Debug.Log("Purchase succeded: " + purchase.Sku + "; Payload: " + purchase.DeveloperPayload);
         if (!VerifyDeveloperPayload(purchase.DeveloperPayload)) {
             return;
         }

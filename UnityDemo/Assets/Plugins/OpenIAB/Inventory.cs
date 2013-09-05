@@ -17,6 +17,12 @@ namespace OpenIabPlugin {
                 Purchase value = new Purchase(pair[1].ToString());
                 _purchaseMap.Add(key, value);
             }
+            foreach (var entry in (List<object>) j.fields["skuMap"]) {
+                List<object> pair = (List<object>) entry;
+                string key = pair[0].ToString();
+                SkuDetails value = new SkuDetails(pair[1].ToString());
+                _skuMap.Add(key, value);
+            }
         }
 
         public override string ToString() {
@@ -25,7 +31,13 @@ namespace OpenIabPlugin {
             foreach (var pair in _purchaseMap) {
                 str.Append("\"" + pair.Key + "\":{" + pair.Value.ToString() + "}");
             }
+            str.Append("}; ");
+            str.Append("skuMap:{");
+            foreach (var pair in _skuMap) {
+                str.Append("\"" + pair.Key + "\":{" + pair.Value.ToString() + "}");
+            }
             str.Append("}");
+
             return str.ToString();
         }
 
