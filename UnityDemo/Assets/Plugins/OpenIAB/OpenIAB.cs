@@ -27,6 +27,8 @@ namespace OpenIabPlugin {
                 return;
             }
 
+            AndroidJNI.AttachCurrentThread();
+
             // Find the plugin instance
             using (var pluginClass = new AndroidJavaClass("com.openiab.OpenIAB")) {
                 _plugin = pluginClass.CallStatic<AndroidJavaObject>("instance");
@@ -74,14 +76,25 @@ namespace OpenIabPlugin {
         }
 
         // Sends a request to get all completed purchases and product information
+        public static void queryInventory() {
+            _plugin.Call("queryInventory");
+        }
+
+        // TODO: implement on java side. does nothing for now
+        // Sends a request to get all completed purchases and product information
         public static void queryInventory(string[] skus) {
-            //_plugin.Call("queryInventory");
+            IntPtr jArrayPtr = AndroidJNIHelper.ConvertToJNIArray(skus);
+            jvalue[] jArray = new jvalue[1];
+            jArray[0].l = jArrayPtr;
+            IntPtr methodId = AndroidJNIHelper.GetMethodID(_plugin.GetRawClass(), "queryInventory");
+            AndroidJNI.CallVoidMethod(_plugin.GetRawObject(), methodId, jArray);
         }
 
         // Purchases the product with the given productId
         public static void purchaseProduct(string sku) {
             if (Application.platform != RuntimePlatform.Android) {
-                OpenIABEventManager.SendMessage("OnPurchaseSucceeded", sku);
+                // TODO: implement editor purchase simulation
+                // OpenIABEventManager.SendMessage("OnPurchaseSucceeded", "smth");
                 return;
             }
             _plugin.Call("purchaseProduct", sku);

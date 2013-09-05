@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace OpenIabPlugin {
     public class Inventory {
@@ -9,7 +10,23 @@ namespace OpenIabPlugin {
         private Dictionary<String, Purchase> _purchaseMap = new Dictionary<String, Purchase>();
 
         public Inventory(string json) {
-            // TODO: parse
+            var j = new JSON(json);
+            foreach (var entry in (List<object>)j.fields["purchaseMap"]) {
+                List<object> pair = (List<object>) entry;
+                string key = pair[0].ToString();
+                Purchase value = new Purchase(pair[1].ToString());
+                _purchaseMap.Add(key, value);
+            }
+        }
+
+        public override string ToString() {
+            StringBuilder str = new StringBuilder();
+            str.Append("purchaseMap:{");
+            foreach (var pair in _purchaseMap) {
+                str.Append("\"" + pair.Key + "\":{" + pair.Value.ToString() + "}");
+            }
+            str.Append("}");
+            return str.ToString();
         }
 
         /**

@@ -39,8 +39,8 @@ public class OpenIABEventManager : MonoBehaviour {
             billingNotSupportedEvent(error);
     }
 
-    // TODO: parse json
     private void OnQueryInventorySucceeded(string json) {
+        //Debug.Log("OnQueryInventorySucceeded RAW data: " + json);
         if (queryInventorySucceededEvent != null) {
             Inventory inventory = new Inventory(json);
             queryInventorySucceededEvent(inventory);

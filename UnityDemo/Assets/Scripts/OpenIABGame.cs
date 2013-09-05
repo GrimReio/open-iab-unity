@@ -78,15 +78,15 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnBillingSupported() {
         Debug.Log("Billing is supported");
-        OpenIAB.queryInventory(new string[] { SKU_GAS });
+        OpenIAB.queryInventory();
     }
 
     private void OnBillingNotSupported(string error) {
-        Debug.Log("Query inventory succeeded: " + error);
+        Debug.Log("Billing not supported: " + error);
     }
 
     private void OnQueryInventorySucceeded(Inventory inventory) {
-
+        Debug.Log("Query inventory succeeded: " + inventory);
     }
 
     private void OnQueryInventoryFailed(string error) {

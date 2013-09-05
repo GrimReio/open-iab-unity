@@ -17,6 +17,7 @@ import org.onepf.oms.appstore.googleUtils.Inventory;
 import org.onepf.oms.appstore.googleUtils.Purchase;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class OpenIAB {
 
@@ -73,7 +74,7 @@ public class OpenIAB {
                 }
 
                 // Hooray, IAB is fully set up. Now, let's get an inventory of stuff we own.
-                Log.d(TAG, "Setup successful. Querying inventory.");
+                Log.d(TAG, "Setup successful.");
                 UnityPlayer.UnitySendMessage(EVENT_MANAGER, BILLING_SUPPORTED_CALLBACK, "");
             }
         });
@@ -85,6 +86,15 @@ public class OpenIAB {
             _helper = null;
         }
         destroyBroadcasts();
+    }
+
+    public void queryInventory() {
+        UnityPlayer.currentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                _helper.queryInventoryAsync(_queryInventoryListener);
+            }
+        });
     }
 
     public void queryInventory(String[] skus) {
@@ -131,9 +141,15 @@ public class OpenIAB {
                 return;
             }
 
-            // TODO: serialize inventory to json
             Log.d(TAG, "Query inventory was successful.");
-            UnityPlayer.UnitySendMessage(EVENT_MANAGER, QUERY_INVENTORY_SUCCEEDED_CALLBACK, "");
+            String jsonInventory;
+            try {
+                jsonInventory = inventoryToJson(inventory);
+            } catch (JSONException e) {
+                UnityPlayer.UnitySendMessage(EVENT_MANAGER, QUERY_INVENTORY_FAILED_CALLBACK, "Couldn't serialize the inventory");
+                return;
+            }
+            UnityPlayer.UnitySendMessage(EVENT_MANAGER, QUERY_INVENTORY_SUCCEEDED_CALLBACK, jsonInventory);
         }
     };
 
@@ -175,20 +191,33 @@ public class OpenIAB {
     };
 
 
+    private String inventoryToJson(Inventory inventory) throws JSONException {
+        JSONStringer json = new JSONStringer().object();
+        json.key("purchaseMap").array();
+        for (Map.Entry<String, Purchase> entry : inventory.mPurchaseMap.entrySet()) {
+            json.array();
+            json.value(entry.getKey());
+            json.value(purchaseToJson(entry.getValue()));
+            json.endArray();
+        }
+        json.endArray().endObject();
+        return json.toString();
+    }
+
     private String purchaseToJson(Purchase purchase) throws JSONException {
         return new JSONStringer()
                 .object()
-                    .key("itemType").value(purchase.getItemType())
-                    .key("orderId").value(purchase.getOrderId())
-                    .key("packageName").value(purchase.getPackageName())
-                    .key("sku").value(purchase.getSku())
-                    .key("purchaseTime").value(purchase.getPurchaseTime())
-                    .key("purchaseState").value(purchase.getPurchaseState())
-                    .key("developerPayload").value(purchase.getDeveloperPayload())
-                    .key("token").value(purchase.getToken())
-                    .key("originalJson").value(purchase.getOriginalJson())
-                    .key("signature").value(purchase.getSignature())
-                    .key("appstoreName").value(purchase.getAppstoreName())
+                .key("itemType").value(purchase.getItemType())
+                .key("orderId").value(purchase.getOrderId())
+                .key("packageName").value(purchase.getPackageName())
+                .key("sku").value(purchase.getSku())
+                .key("purchaseTime").value(purchase.getPurchaseTime())
+                .key("purchaseState").value(purchase.getPurchaseState())
+                .key("developerPayload").value(purchase.getDeveloperPayload())
+                .key("token").value(purchase.getToken())
+                .key("originalJson").value(purchase.getOriginalJson())
+                .key("signature").value(purchase.getSignature())
+                .key("appstoreName").value(purchase.getAppstoreName())
                 .endObject()
                 .toString();
     }
