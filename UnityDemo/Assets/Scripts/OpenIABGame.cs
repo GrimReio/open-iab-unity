@@ -20,11 +20,12 @@ public class OpenIABGame : MonoBehaviour {
     int _distance = 0;
     bool _processingPayment = false;
     bool _isPremium = false;
+    bool _subscribedToInfiniteGas = false;
 
     [SerializeField]
     Car _car = null;
 
-    private void Awake() {
+    private void Start() {
         LoadData();
         OpenIAB.init(new Dictionary<string, string> {
             {OpenIAB.STORE_GOOGLE, ""},
@@ -91,6 +92,7 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnBillingNotSupported(string error) {
         Debug.Log("Billing not supported: " + error);
+        _car.SetRegular();
     }
 
     private void OnQueryInventorySucceeded(Inventory inventory) {
@@ -110,13 +112,11 @@ public class OpenIABGame : MonoBehaviour {
             _car.SetRegular();
         }
 
-        //// Do we have the infinite gas plan?
-        //Purchase infiniteGasPurchase = inventory.getPurchase(SKU_INFINITE_GAS);
-        //mSubscribedToInfiniteGas = (infiniteGasPurchase != null && 
-        //            verifyDeveloperPayload(infiniteGasPurchase));
-        //Log.d(TAG, "User " + (mSubscribedToInfiniteGas ? "HAS" : "DOES NOT HAVE") 
-        //                + " infinite gas subscription.");
-        //if (mSubscribedToInfiniteGas) mTank = TANK_MAX;
+        // Do we have the infinite gas plan?
+        Purchase infiniteGasPurchase = inventory.GetPurchase(SKU_INFINITE_GAS);
+        _subscribedToInfiniteGas = (infiniteGasPurchase != null && VerifyDeveloperPayload(infiniteGasPurchase.DeveloperPayload));
+        Debug.Log("User " + (_subscribedToInfiniteGas ? "HAS" : "DOES NOT HAVE") + " infinite gas subscription.");
+        if (_subscribedToInfiniteGas) _tank = TANK_MAX;
 
         // Check for gas delivery -- if we own gas, we should fill up the tank immediately
         Purchase gasPurchase = inventory.GetPurchase(SKU_GAS);
@@ -129,6 +129,7 @@ public class OpenIABGame : MonoBehaviour {
     private void OnQueryInventoryFailed(string error) {
         Debug.Log("Query inventory failed: " + error);
     }
+
     private void OnPurchaseSucceded(Purchase purchase) {
         Debug.Log("Purchase succeded: " + purchase.Sku + "; Payload: " + purchase.DeveloperPayload);
         if (!VerifyDeveloperPayload(purchase.DeveloperPayload)) {
@@ -141,6 +142,10 @@ public class OpenIABGame : MonoBehaviour {
             case SKU_PREMIUM:
                 _isPremium = true;
                 _car.SetPremium();
+                break;
+            case SKU_INFINITE_GAS:
+                _subscribedToInfiniteGas = true;
+                _tank = TANK_MAX;
                 break;
             default:
                 Debug.LogWarning("Unknown SKU: " + purchase.Sku);
@@ -170,7 +175,10 @@ public class OpenIABGame : MonoBehaviour {
     private void OnGUI() {
         GUI.skin.box.alignment = TextAnchor.MiddleCenter;
         int offset = OFFSET;
-        GUI.Label(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, LABEL_HEIGHT), string.Format("You drove {0} miles. Gas: {1}", _distance, _tank));
+        if (_subscribedToInfiniteGas)
+            GUI.Label(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, LABEL_HEIGHT), string.Format("You drove {0} miles.", _distance));
+        else
+            GUI.Label(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, LABEL_HEIGHT), string.Format("You drove {0} miles. Gas: {1}", _distance, _tank));
         offset += OFFSET+LABEL_HEIGHT;
         
         // Drive button
@@ -179,7 +187,8 @@ public class OpenIABGame : MonoBehaviour {
         } else {
             if (GUI.Button(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), "DRIVE")) {
                 _distance += 10;
-                --_tank;
+                if (!_subscribedToInfiniteGas)
+                    --_tank;
                 SaveData();
                 Debug.Log("Vrooom. Tank is now " + _tank);
             }
@@ -187,30 +196,26 @@ public class OpenIABGame : MonoBehaviour {
         offset += OFFSET+BUTTON_HEIGHT;
         
         // Buy gas button
-        if (_tank < TANK_MAX) {
-            if (_processingPayment) {
-                GUI.Box(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), "BUY GAS");
-            } else {
-                if (GUI.Button(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), "BUY GAS")) {
-                    _processingPayment = true;
-                    OpenIAB.purchaseProduct(SKU_GAS, "PAYLOAD");
-                }
-            }
-            offset += OFFSET+BUTTON_HEIGHT;
-        }        
+        if (!_subscribedToInfiniteGas && _tank < TANK_MAX)
+            ShowBuyButton("BUY GAS", SKU_GAS, "PAYLOAD", ref offset);
 
-        // Buy premium button
-        if (!_isPremium) {
-            if (_processingPayment) {
-                GUI.Box(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), "UPGRADE CAR");
-            } else {
-                if (GUI.Button(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), "UPGRADE CAR")) {
-                    _processingPayment = true;
-                    OpenIAB.purchaseProduct(SKU_PREMIUM, "PAYLOAD");
-                }
+        if (!_subscribedToInfiniteGas)
+            ShowBuyButton("SUBSCRIBE TO INFINITE GAS", SKU_INFINITE_GAS, "PAYLOAD", ref offset);
+
+        if (!_isPremium)
+            ShowBuyButton("UPGRADE CAR", SKU_PREMIUM, "PAYLOAD", ref offset);
+    }
+
+    private void ShowBuyButton(string title, string sku, string payload, ref int offset) {
+        if (_processingPayment) {
+            GUI.Box(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), title);
+        } else {
+            if (GUI.Button(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), title)) {
+                _processingPayment = true;
+                OpenIAB.purchaseProduct(sku, payload);
             }
-            offset += OFFSET+BUTTON_HEIGHT;
         }
+        offset += OFFSET+BUTTON_HEIGHT;
     }
 
     private void SaveData() {

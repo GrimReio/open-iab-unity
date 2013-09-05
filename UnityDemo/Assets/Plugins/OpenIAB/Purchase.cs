@@ -16,6 +16,9 @@ namespace OpenIabPlugin {
         public string Signature { get; private set; }
         public string AppstoreName { get; private set; }
 
+        private Purchase() {
+        }
+
         public Purchase(string json) {
             var j = new JSON(json);
             ItemType = j.ToString("itemType");
@@ -29,6 +32,17 @@ namespace OpenIabPlugin {
             OriginalJson = j.ToString("originalJson");
             Signature = j.ToString("signature");
             AppstoreName = j.ToString("appstoreName");
+        }
+
+        // For debug purposes and editor mode
+        internal static Purchase CreateFromSku(string sku) {
+            return CreateFromSku(sku, "");
+        }
+        internal static Purchase CreateFromSku(string sku, string developerPayload) {
+            var p = new Purchase();
+            p.Sku = sku;
+            p.DeveloperPayload = developerPayload;
+            return p;
         }
 
         public override string ToString() {

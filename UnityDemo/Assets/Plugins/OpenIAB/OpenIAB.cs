@@ -44,7 +44,7 @@ namespace OpenIabPlugin {
         // Starts up the billing service. This will also check to see if in app billing is supported and fire the appropriate event
         public static void init(Dictionary<string, string> storeKeys) {
             if (Application.platform != RuntimePlatform.Android) {
-                OpenIABEventManager.SendMessage("OnBillingSupported", "");
+                OpenIABEventManager.SendMessage("OnBillingNotSupported", "editor mode");
                 return;
             }
 
@@ -83,6 +83,10 @@ namespace OpenIabPlugin {
         // TODO: implement on java side. does nothing for now
         // Sends a request to get all completed purchases and product information
         public static void queryInventory(string[] skus) {
+            if (Application.platform != RuntimePlatform.Android) {
+                // TODO: implement editor purchase simulation
+                return;
+            }
             IntPtr jArrayPtr = AndroidJNIHelper.ConvertToJNIArray(skus);
             jvalue[] jArray = new jvalue[1];
             jArray[0].l = jArrayPtr;
@@ -93,8 +97,7 @@ namespace OpenIabPlugin {
         // Purchases the product with the given productId
         public static void purchaseProduct(string sku) {
             if (Application.platform != RuntimePlatform.Android) {
-                // TODO: implement editor purchase simulation
-                // OpenIABEventManager.SendMessage("OnPurchaseSucceeded", "smth");
+                OpenIABEventManager.SendMessage("OnPurchaseSucceeded", Purchase.CreateFromSku(sku).Serialize());
                 return;
             }
             _plugin.Call("purchaseProduct", sku);
@@ -103,8 +106,7 @@ namespace OpenIabPlugin {
         // Purchases the product with the given productId and developerPayload
         public static void purchaseProduct(string sku, string developerPayload) {
             if (Application.platform != RuntimePlatform.Android) {
-                // TODO: implement editor purchase simulation
-                // OpenIABEventManager.SendMessage("OnPurchaseSucceeded", "json");
+                OpenIABEventManager.SendMessage("OnPurchaseSucceeded", Purchase.CreateFromSku(sku, developerPayload).Serialize());
                 return;
             }
             _plugin.Call("purchaseProduct", sku, developerPayload);
@@ -113,8 +115,7 @@ namespace OpenIabPlugin {
         // Sends out a request to consume the product
         public static void consumeProduct(Purchase purchase) {
             if (Application.platform != RuntimePlatform.Android) {
-                // TODO: implement editor purchase simulation
-                // OpenIABEventManager.SendMessage("OnConsumePurchaseSucceeded", "json");
+                OpenIABEventManager.SendMessage("OnConsumePurchaseSucceeded", purchase.Serialize());
                 return;
             }
             _plugin.Call("consumeProduct", purchase.Serialize());
