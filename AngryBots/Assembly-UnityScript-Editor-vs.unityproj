@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+	<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+	<ProductVersion>10.0.20506</ProductVersion>
+	<SchemaVersion>2.0</SchemaVersion>
+	<ProjectGuid>{1854B7F7-5D67-C81B-F7EE-9AE06B2A93ED}</ProjectGuid>
+	<OutputType>Library</OutputType>
+	<AppDesignerFolder>Properties</AppDesignerFolder>
+	<RootNamespace></RootNamespace>
+	<AssemblyName>Assembly-UnityScript-Editor</AssemblyName>
+	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+	<FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	<DebugSymbols>true</DebugSymbols>
+	<DebugType>full</DebugType>
+	<Optimize>false</Optimize>
+	<OutputPath>Temp\bin\Debug\</OutputPath>
+	<DefineConstants>DEBUG;TRACE;UNITY_ANDROID;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_AUDIO_FMOD;ENABLE_MONO;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_WEBCAM;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;ENABLE_CACHING;ENABLE_CLOTH;UNITY_ANDROID_API;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;UNITY_4_2_0;UNITY_4_2;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_WIN;UNITY_TEAM_LICENSE;ENABLE_DUCK_TYPING</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	<DebugType>pdbonly</DebugType>
+	<Optimize>true</Optimize>
+	<OutputPath>Temp\bin\Release\</OutputPath>
+	<DefineConstants>TRACE</DefineConstants>
+	<ErrorReport>prompt</ErrorReport>
+	<WarningLevel>4</WarningLevel>
+	<NoWarn>0169</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+	<Reference Include="System" />
+    <Reference Include="System.XML" />
+	<Reference Include="System.Core" />
+	<Reference Include="UnityEngine">
+	  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEngine.dll</HintPath>
+	</Reference>
+	<Reference Include="UnityEditor">
+	  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEditor.dll</HintPath>
+	</Reference>
+  </ItemGroup>
+  <ItemGroup>
+     <Compile Include="Assets\Editor\RenderCubemapWizard.js" />
+     <Compile Include="Assets\Editor\SkyBoxGenerator.js" />
+     <Compile Include="Assets\Editor\deactivateMeshRenderers.js" />
+     <Compile Include="Assets\Scripts\Editor\PatrolPointEditor.js" />
+     <Compile Include="Assets\Scripts\Editor\PatrolRouteConnector.js" />
+     <Compile Include="Assets\Scripts\Editor\PatrolRouteEditor.js" />
+     <Compile Include="Assets\Scripts\Editor\ReplacePrefabInstances.js" />
+     <Compile Include="Assets\Scripts\Editor\SampleAnimationOnSelected.js" />
+     <Compile Include="Assets\Scripts\Editor\UseOnlyUnlitShaders.js" />
+     <None Include="Assets\Shaders\Fx\Rain.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\RealtimeReflectionInWaterFlow.shader" />
+     <None Include="Assets\Shaders\Fx\Cursor.shader" />
+     <None Include="Assets\Shaders\Fx\ParticleAdditiveBlend.shader" />
+     <None Include="Assets\Shaders\Fx\AdditiveBlend.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\RealtimeReflectionReplacement.shader" />
+     <None Include="Assets\Shaders\Fx\Additive.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\ReflectiveBackgroundArbitrary.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\ReflectiveBackgroundSelfIllumination.shader" />
+     <None Include="Assets\Resources\HeightDepthOfField.shader" />
+     <None Include="Assets\Resources\BlurPassesForDof.shader" />
+     <None Include="Assets\Shaders\Fx\ScreenRefract.shader" />
+     <None Include="Assets\Shaders\Fx\RainSplash.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\Fallback.shader" />
+     <None Include="Assets\Shaders\Fx\Multiply.shader" />
+     <None Include="Assets\Shaders\Fx\Blend.shader" />
+     <None Include="Assets\Shaders\Fx\HeightFogBeforeTransparent.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\CharacterSelfIlluminationReflective.shader" />
+     <None Include="Assets\Resources\ColoredNoise.shader" />
+     <None Include="Assets\Shaders\Fx\InterlacePatternBlend.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\PlanarRealtimeReflection.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\ReflectiveBackgroundPlanar.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\EnemySelfIlluminationReflective.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\AngryInclude.cginc" />
+     <None Include="Assets\Resources\MobileBloom.shader" />
+     <None Include="Assets\Shaders\Fx\ParticleMultiply.shader" />
+     <None Include="Assets\Shaders\Fx\ParticleAdditive.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\AlphaCutoutCheapFallback.shader" />
+     <None Include="Assets\Shaders\Fx\LaserScope.shader" />
+     <None Include="Assets\Shaders\BackgroundAndCharacters\SuperSimpleSelfIllumination.shader" />
+     <None Include="Assets\Shaders\Fx\ParticleBlend.shader" />
+     <None Include="Assets\Shaders\Fx\InterlacePatternAdditive.shader" />
+ <Reference Include="Assembly-UnityScript">
+ <HintPath>Library\ScriptAssemblies\Assembly-UnityScript.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.Graphs">
+ <HintPath>C:\Program Files (x86)\Unity\Editor\Data\Managed\UnityEditor.Graphs.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.iOS.Extensions">
+ <HintPath>C:\Program Files (x86)\Unity\Editor\Data\PlaybackEngines\iPhonePlayer\EditorExtensions\UnityEditor.iOS.Extensions.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.WP8.Extensions">
+ <HintPath>C:\Program Files (x86)\Unity\Editor\Data\PlaybackEngines\WP8Support\EditorExtensions\UnityEditor.WP8.Extensions.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.Metro.Extensions">
+ <HintPath>C:\Program Files (x86)\Unity\Editor\Data\PlaybackEngines\MetroSupport\EditorExtensions\UnityEditor.Metro.Extensions.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.BB10.Extensions">
+ <HintPath>C:\Program Files (x86)\Unity\Editor\Data\PlaybackEngines\BB10Player\EditorExtensions\UnityEditor.BB10.Extensions.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEditor.Android.Extensions">
+ <HintPath>C:\Program Files (x86)\Unity\Editor\Data\PlaybackEngines\AndroidPlayer\EditorExtensions\UnityEditor.Android.Extensions.dll</HintPath>
+ </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-vs.csproj">
+      <Project>{96973C44-81EA-6A79-E5F0-0EA67F954EB0}</Project>      <Name>Assembly-CSharp-vs</Name>    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	   Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  
+</Project>
