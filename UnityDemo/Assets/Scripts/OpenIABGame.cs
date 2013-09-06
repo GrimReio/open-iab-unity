@@ -201,20 +201,25 @@ public class OpenIABGame : MonoBehaviour {
         if (!_subscribedToInfiniteGas && _tank < TANK_MAX)
             ShowBuyButton("BUY GAS", SKU_GAS, "PAYLOAD", ref offset);
 
+        // Buy subscription button
         if (!_subscribedToInfiniteGas)
-            ShowBuyButton("SUBSCRIBE TO INFINITE GAS", SKU_INFINITE_GAS, "PAYLOAD", ref offset);
+            ShowBuyButton("SUBSCRIBE TO INFINITE GAS", SKU_INFINITE_GAS, "PAYLOAD", ref offset, true);
 
+        // Buy upgrade button
         if (!_isPremium)
             ShowBuyButton("UPGRADE CAR", SKU_PREMIUM, "PAYLOAD", ref offset);
     }
 
-    private void ShowBuyButton(string title, string sku, string payload, ref int offset) {
+    private void ShowBuyButton(string title, string sku, string payload, ref int offset, bool isSubscription=false) {
         if (_processingPayment) {
             GUI.Box(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), title);
         } else {
             if (GUI.Button(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), title)) {
                 _processingPayment = true;
-                OpenIAB.purchaseProduct(sku, payload);
+                if (isSubscription)
+                    OpenIAB.purchaseSubscription(sku, payload);
+                else
+                    OpenIAB.purchaseProduct(sku, payload);
             }
         }
         offset += OFFSET+BUTTON_HEIGHT;

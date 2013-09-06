@@ -98,22 +98,22 @@ namespace OpenIabPlugin {
             AndroidJNI.CallVoidMethod(_plugin.GetRawObject(), methodId, jArray);
         }
 
-        // Purchases the product with the given productId
-        public static void purchaseProduct(string sku) {
-            if (Application.platform != RuntimePlatform.Android) {
-                OpenIABEventManager.SendMessage("OnPurchaseSucceeded", Purchase.CreateFromSku(sku).Serialize());
-                return;
-            }
-            _plugin.Call("purchaseProduct", sku);
-        }
-
-        // Purchases the product with the given productId and developerPayload
-        public static void purchaseProduct(string sku, string developerPayload) {
+        // Purchases the product with the given sku and developerPayload
+        public static void purchaseProduct(string sku, string developerPayload="") {
             if (Application.platform != RuntimePlatform.Android) {
                 OpenIABEventManager.SendMessage("OnPurchaseSucceeded", Purchase.CreateFromSku(sku, developerPayload).Serialize());
                 return;
             }
             _plugin.Call("purchaseProduct", sku, developerPayload);
+        }
+
+        // Purchases the subscription with the given sku and developerPayload
+        public static void purchaseSubscription(string sku, string developerPayload="") {
+            if (Application.platform != RuntimePlatform.Android) {
+                OpenIABEventManager.SendMessage("OnPurchaseSucceeded", Purchase.CreateFromSku(sku, developerPayload).Serialize());
+                return;
+            }
+            _plugin.Call("purchaseSubscription", sku, developerPayload);
         }
 
         // Sends out a request to consume the product

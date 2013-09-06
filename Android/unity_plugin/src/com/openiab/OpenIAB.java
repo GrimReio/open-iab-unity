@@ -103,16 +103,15 @@ public class OpenIAB {
         _helper.queryInventoryAsync(_queryInventoryListener);
     }
 
-    public void purchaseProduct(final String sku) {
-        Log.i("OpenIAB", "Starting purchase");
-        _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
-                _purchaseFinishedListener);
-    }
-
     public void purchaseProduct(final String sku, final String developerPayload) {
-        Log.i("OpenIAB", "Starting purchase with payload");
+        Log.i("OpenIAB", "Starting product purchase.");
         _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
                 _purchaseFinishedListener, developerPayload);
+    }
+
+    public void purchaseSubscription(final String sku, final String developerPayload) {
+        Log.i("OpenIAB", "Starting subscription purchase.");
+        _helper.launchSubscriptionPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST, _purchaseFinishedListener, developerPayload);
     }
 
     public void consumeProduct(final String json) {

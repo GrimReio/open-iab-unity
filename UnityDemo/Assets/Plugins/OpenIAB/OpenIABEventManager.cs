@@ -14,7 +14,7 @@ public class OpenIABEventManager : MonoBehaviour {
     public static event Action<Inventory> queryInventorySucceededEvent;
     // Fired when the inventory and purchase history query fails
     public static event Action<string> queryInventoryFailedEvent;
-    // Fired when a purchase succeeds
+    // Fired when a purchase of a product or a subscription succeeds
     public static event Action<Purchase> purchaseSucceededEvent;
     // Fired when a purchase fails
     public static event Action<string> purchaseFailedEvent;
