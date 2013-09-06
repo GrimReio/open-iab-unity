@@ -87,7 +87,6 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnBillingSupported() {
         Debug.Log("Billing is supported");
-        Debug.Log("Subscription support: " + OpenIAB.areSubscriptionsSupported());
         OpenIAB.queryInventory();
     }
 
@@ -216,10 +215,15 @@ public class OpenIABGame : MonoBehaviour {
         } else {
             if (GUI.Button(new Rect(Screen.width/2-BUTTON_WIDTH/2, offset, BUTTON_WIDTH, BUTTON_HEIGHT), title)) {
                 _processingPayment = true;
-                if (isSubscription)
-                    OpenIAB.purchaseSubscription(sku, payload);
-                else
+                if (isSubscription) {
+                    if (!OpenIAB.areSubscriptionsSupported()) {
+                        Debug.LogError("Subscriptions are not supported. Sorry!");
+                    } else {
+                        OpenIAB.purchaseSubscription(sku, payload);
+                    }
+                } else {
                     OpenIAB.purchaseProduct(sku, payload);
+                }
             }
         }
         offset += OFFSET+BUTTON_HEIGHT;
