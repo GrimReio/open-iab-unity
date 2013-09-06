@@ -75,6 +75,10 @@ namespace OpenIabPlugin {
             _plugin.Call("unbindService");
         }
 
+        public static bool areSubscriptionsSupported() {
+            return _plugin.Call<bool>("areSubscriptionsSupported");
+        }
+
         // Sends a request to get all completed purchases and product information
         public static void queryInventory() {
             _plugin.Call("queryInventory");

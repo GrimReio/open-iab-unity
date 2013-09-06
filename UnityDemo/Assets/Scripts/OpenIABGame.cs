@@ -87,6 +87,7 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnBillingSupported() {
         Debug.Log("Billing is supported");
+        Debug.Log("Subscription support: " + OpenIAB.areSubscriptionsSupported());
         OpenIAB.queryInventory();
     }
 
@@ -128,6 +129,7 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnQueryInventoryFailed(string error) {
         Debug.Log("Query inventory failed: " + error);
+        _car.SetRegular();
     }
 
     private void OnPurchaseSucceded(Purchase purchase) {

@@ -63,7 +63,7 @@ public class OpenIAB {
             public void onIabSetupFinished(IabResult result) {
                 Log.d(TAG, "Setup finished.");
 
-                if (!result.isSuccess()) {
+                if (result.isFailure()) {
                     // Oh noes, there was a problem.
                     Log.e(TAG, "Problem setting up in-app billing: " + result);
                     UnityPlayer.UnitySendMessage(EVENT_MANAGER, BILLING_NOT_SUPPORTED_CALLBACK, result.getMessage());
@@ -83,6 +83,10 @@ public class OpenIAB {
             _helper = null;
         }
         destroyBroadcasts();
+    }
+
+    public boolean areSubscriptionsSupported() {
+        return _helper.subscriptionsSupported();
     }
 
     public void queryInventory() {
