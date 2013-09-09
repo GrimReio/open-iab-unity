@@ -133,3 +133,10 @@ function Regenerate () {
 		}
 	}
 }
+
+function Heal () {
+    health += 25;
+    if (health >= maxHealth) {
+        health = maxHealth;
+    }
+}

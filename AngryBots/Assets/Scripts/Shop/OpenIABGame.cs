@@ -92,7 +92,6 @@ public class OpenIABGame : MonoBehaviour {
 
     private void OnBillingNotSupported(string error) {
         Debug.Log("Billing not supported: " + error);
-        _car.SetRegular();
     }
 
     private void OnQueryInventorySucceeded(Inventory inventory) {
