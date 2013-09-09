@@ -104,14 +104,24 @@ public class OpenIAB {
     }
 
     public void purchaseProduct(final String sku, final String developerPayload) {
+        try {
+            _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
+                    _purchaseFinishedListener, developerPayload);
+        } catch (java.lang.IllegalStateException e) {
+            _purchaseFinishedListener.onIabPurchaseFinished(new IabResult(IabHelper.BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE, "Cannot start product purchase. Another operation is in progress."), null);
+            return;
+        }
         Log.i("OpenIAB", "Starting product purchase.");
-        _helper.launchPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST,
-                _purchaseFinishedListener, developerPayload);
     }
 
     public void purchaseSubscription(final String sku, final String developerPayload) {
+        try {
+            _helper.launchSubscriptionPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST, _purchaseFinishedListener, developerPayload);
+        } catch (java.lang.IllegalStateException e) {
+            _purchaseFinishedListener.onIabPurchaseFinished(new IabResult(IabHelper.BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE, "Cannot start subscription purchase. Another operation is in progress."), null);
+            return;
+        }
         Log.i("OpenIAB", "Starting subscription purchase.");
-        _helper.launchSubscriptionPurchaseFlow(UnityPlayer.currentActivity, sku, RC_REQUEST, _purchaseFinishedListener, developerPayload);
     }
 
     public void consumeProduct(final String json) {
