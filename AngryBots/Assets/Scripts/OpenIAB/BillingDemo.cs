@@ -13,7 +13,7 @@ public class BillingDemo : MonoBehaviour {
     private const int SIDE_BUTTON_HEIGHT = 80;
 
     private const int WINDOW_WIDTH = 400;
-    private const int WINDOW_HEIGHT = 400;
+    private const int WINDOW_HEIGHT = 390;
 
     private const int FONT_SIZE = 24;
 
@@ -22,10 +22,13 @@ public class BillingDemo : MonoBehaviour {
     private const string SKU_MEDKIT = "sku_medkit";
     private const string SKU_AMMO = "sku_ammo";
     private const string SKU_INFINITE_AMMO = "sku_infinite_ammo";
+    private const string SKU_COWBOY_HAT = "sku_cowboy_hat";
 
     private bool _processingPayment = false;
     private bool _showShopWindow = false;
     private string _popupText = "";
+
+    private bool _isCowboyHat = false;
 
     private GameObject[] _joysticks = null;
 
@@ -33,6 +36,8 @@ public class BillingDemo : MonoBehaviour {
     private AmmoBox _playerAmmoBox = null;
     [SerializeField]
     private MedKitPack _playerMedKitPack = null;
+    [SerializeField]
+    private PlayerHat _playerHat = null;
 
     #region Billing
     private void Awake() {
@@ -115,6 +120,12 @@ public class BillingDemo : MonoBehaviour {
             _playerAmmoBox.IsInfinite = true;
         }
 
+        // Check cowboy hat purchase
+        Purchase cowboyHatPurchase = inventory.GetPurchase(SKU_COWBOY_HAT);
+        bool isCowboyHat = (cowboyHatPurchase != null && VerifyDeveloperPayload(cowboyHatPurchase.DeveloperPayload));
+        Debug.Log("User " + (isCowboyHat ? "HAS" : "HAS NO") + " cowboy hat");
+        _playerHat.PutOn = isCowboyHat;
+        
         // Check for delivery of expandable items. If we own some, we should consume everything immediately
         Purchase medKitPurchase = inventory.GetPurchase(SKU_MEDKIT);
         if (medKitPurchase  != null && VerifyDeveloperPayload(medKitPurchase.DeveloperPayload)) {
@@ -144,6 +155,9 @@ public class BillingDemo : MonoBehaviour {
             case SKU_AMMO:
                 OpenIAB.consumeProduct(purchase);
                 return;
+            case SKU_COWBOY_HAT:
+                _playerHat.PutOn = true;
+                break;
             case SKU_INFINITE_AMMO:
                 _playerAmmoBox.IsInfinite = true;
                 break;
@@ -222,8 +236,8 @@ public class BillingDemo : MonoBehaviour {
         if (_playerAmmoBox.IsFull) {
             GUI.Box(rect, "Ammo box is full");
         } else if (_playerAmmoBox.IsInfinite) {
-            GUI.Box(rect, "Buy ammo");
-        } else if (GUI.Button(rect, string.Format("Buy ammo ({0} rounds)", N_ROUNDS))) {
+            GUI.Box(rect, "Buy Ammo");
+        } else if (GUI.Button(rect, string.Format("Buy Ammo ({0} rounds)", N_ROUNDS))) {
             _processingPayment = true;
             OpenIAB.purchaseProduct(SKU_AMMO);
         }
@@ -237,6 +251,14 @@ public class BillingDemo : MonoBehaviour {
             OpenIAB.purchaseProduct(SKU_MEDKIT);
         }
 
+        // Buy Cowboy Hat
+        rect = new Rect(10, SIDE_BUTTON_HEIGHT*3+55, WINDOW_WIDTH-20, SIDE_BUTTON_HEIGHT);
+        if (_playerHat.PutOn) {
+            GUI.Box(rect, "Cowboy hat purchased");
+        } else if (GUI.Button(rect, "Buy Cowboy Hat")) {
+            _processingPayment = true;
+            OpenIAB.purchaseProduct(SKU_COWBOY_HAT);
+        }
     }
 
     void DrawSidePanel() {
