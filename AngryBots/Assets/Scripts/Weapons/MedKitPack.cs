@@ -10,6 +10,9 @@ public class MedKitPack : MonoBehaviour {
 
     public bool IsFull { get { return _nMedKits >= MAX_KITS; } }
 
+    [SerializeField]
+    AudioSource _healAudioSource = null;
+
     void Awake() {
         _nMedKits = PlayerPrefs.GetInt("nMedKits", 1);
     }
@@ -29,6 +32,7 @@ public class MedKitPack : MonoBehaviour {
     public bool Use() {
         if (_nMedKits > 0) {
             --_nMedKits;
+            _healAudioSource.Play();
             SendMessage("Heal");
             SaveData();
             return true;

@@ -12,7 +12,10 @@ public class AmmoBox : MonoBehaviour {
 
     public bool IsFull { get { return _nRounds >= MAX_ROUNDS; } }
 
-    public bool IsInfinite { get { return _isInfinite; } set { _isInfinite = value; SendMessage("SetInfiniteAmmo", value); } } 
+    public bool IsInfinite { get { return _isInfinite; } set { _isInfinite = value; SendMessage("SetInfiniteAmmo", value); } }
+
+    [SerializeField]
+    AudioSource _reloadAudioSource = null;
 
     void Awake() {
         _nRounds = PlayerPrefs.GetInt("nRounds", 2);
@@ -33,6 +36,7 @@ public class AmmoBox : MonoBehaviour {
     public bool Use() {
         if (_nRounds > 0) {
             --_nRounds;
+            _reloadAudioSource.Play();
             SendMessage("Reload");
             SaveData();
             return true;
