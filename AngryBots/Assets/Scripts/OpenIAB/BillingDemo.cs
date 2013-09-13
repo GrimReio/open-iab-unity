@@ -28,8 +28,6 @@ public class BillingDemo : MonoBehaviour {
     private bool _showShopWindow = false;
     private string _popupText = "";
 
-    private bool _isCowboyHat = false;
-
     private GameObject[] _joysticks = null;
 
     [SerializeField]
@@ -54,8 +52,8 @@ public class BillingDemo : MonoBehaviour {
     private void Start() {
         //LoadData();
         OpenIAB.init(new Dictionary<string, string> {
+            {OpenIAB.STORE_AMAZON, "c18a8ce946f646999c35b3da532aa9e3"},
             {OpenIAB.STORE_GOOGLE, ""},
-            {OpenIAB.STORE_AMAZON, ""},
             {OpenIAB.STORE_TSTORE, ""},
             {OpenIAB.STORE_SAMSUNG, ""},
             {OpenIAB.STORE_YANDEX, ""}
