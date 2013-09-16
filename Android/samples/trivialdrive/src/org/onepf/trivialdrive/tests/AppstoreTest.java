@@ -1,4 +1,4 @@
-package org.onepf.trivialdrivedemo.tests;
+package org.onepf.trivialdrive.tests;
 
 import android.content.Context;
 

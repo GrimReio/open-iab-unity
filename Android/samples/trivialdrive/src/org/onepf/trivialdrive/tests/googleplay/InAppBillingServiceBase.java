@@ -1,4 +1,4 @@
-package org.onepf.trivialdrivedemo.tests.googleplay;
+package org.onepf.trivialdrive.tests.googleplay;
 
 import android.os.Bundle;
 import android.os.IBinder;

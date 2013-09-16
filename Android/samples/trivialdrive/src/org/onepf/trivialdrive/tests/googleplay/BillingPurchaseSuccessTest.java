@@ -1,4 +1,4 @@
-package org.onepf.trivialdrivedemo.tests.googleplay;
+package org.onepf.trivialdrive.tests.googleplay;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -15,7 +15,7 @@ import org.onepf.oms.appstore.GooglePlay;
 import org.onepf.oms.appstore.googleUtils.IabHelper;
 import org.onepf.oms.appstore.googleUtils.IabResult;
 import org.onepf.oms.appstore.googleUtils.Purchase;
-import org.onepf.trivialdrivedemo.tests.AsyncAppstoreTest;
+import org.onepf.trivialdrive.tests.AsyncAppstoreTest;
 
 public class BillingPurchaseSuccessTest extends AsyncAppstoreTest {
 
