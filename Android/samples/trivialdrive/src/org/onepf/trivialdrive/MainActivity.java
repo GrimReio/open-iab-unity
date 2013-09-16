@@ -141,7 +141,7 @@ public class MainActivity extends Activity {
     // The helper object
     OpenIabHelper mHelper;
 
-    static final boolean TEST_MODE = true;
+    static final boolean TEST_MODE = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
