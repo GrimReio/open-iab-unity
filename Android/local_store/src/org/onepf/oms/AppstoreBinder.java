@@ -5,6 +5,7 @@ import android.os.RemoteException;
 
 public class AppstoreBinder extends IOpenAppstore.Stub {
 
+    public static final String TAG = "OnePF_store";
     private static final String BILLING_BIND_INTENT = "org.onepf.oms.billing.BIND";
 
     @Override
@@ -14,7 +15,7 @@ public class AppstoreBinder extends IOpenAppstore.Stub {
 
     @Override
     public boolean isPackageInstaller(String packageName) throws RemoteException {
-        // TODO: read "installed" package list and SKUs from text file
+        // TODO: read "installed" package list, dev keys, SKUs, etc from text file
         return true;
     }
 

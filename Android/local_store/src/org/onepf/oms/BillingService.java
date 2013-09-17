@@ -6,7 +6,14 @@ import android.os.IBinder;
 
 public class BillingService extends Service {
 
-    BillingBinder _binder = new BillingBinder();
+    BillingBinder _binder;
+    BillingDatabase _database = new BillingDatabase();
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        _binder = new BillingBinder(this, _database);
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
