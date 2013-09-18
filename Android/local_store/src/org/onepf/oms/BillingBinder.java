@@ -57,8 +57,13 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
 
     @Override
     public int isBillingSupported(int apiVersion, String packageName, String type) throws RemoteException {
-        // TODO: perform some checks
-        return RESULT_OK;
+        if (apiVersion >= 3 &&
+                _db.getApplication(packageName) != null &&
+                (type.equals(BillingBinder.ITEM_TYPE_INAPP) || type.equals(BillingBinder.ITEM_TYPE_SUBS))) {
+            return RESULT_OK;
+        } else {
+            return RESULT_BILLING_UNAVAILABLE;
+        }
     }
 
     /**
