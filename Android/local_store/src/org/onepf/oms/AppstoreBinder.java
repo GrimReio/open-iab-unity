@@ -11,9 +11,6 @@ public class AppstoreBinder extends IOpenAppstore.Stub {
     public static final String TAG = "OnePF_store";
     private static final String BILLING_BIND_INTENT = "org.onepf.oms.billing.BIND";
 
-    // package name - version
-    HashMap<String, Integer> _packageMap = new HashMap<String, Integer>();
-
     @Override
     public String getAppstoreName() throws RemoteException {
         return "org.onepf.store";

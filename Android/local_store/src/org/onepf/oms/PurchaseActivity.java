@@ -12,6 +12,13 @@ public class PurchaseActivity extends Activity {
         setContentView(R.layout.purchase);
     }
 
+    public void onCancelClick(View view) {
+        Intent intent = getIntent();
+        intent.putExtra(BillingBinder.RESPONSE_CODE, BillingBinder.RESULT_USER_CANCELED);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
     public void onOkClick(View view) {
         Intent intent = getIntent();
         setResult(RESULT_OK, intent);

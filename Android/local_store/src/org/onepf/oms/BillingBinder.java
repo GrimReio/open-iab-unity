@@ -14,29 +14,29 @@ import java.util.ArrayList;
 public class BillingBinder extends IOpenInAppBillingService.Stub {
 
     // Response result codes
-    static final int RESULT_OK = 0;
-    static final int RESULT_USER_CANCELED = 1;
-    static final int RESULT_BILLING_UNAVAILABLE = 3;
-    static final int RESULT_ITEM_UNAVAILABLE = 4;
-    static final int RESULT_DEVELOPER_ERROR = 5;
-    static final int RESULT_ERROR = 6;
-    static final int RESULT_ITEM_ALREADY_OWNED = 7;
-    static final int RESULT_ITEM_NOT_OWNED = 8;
+    public static final int RESULT_OK = 0;
+    public static final int RESULT_USER_CANCELED = 1;
+    public static final int RESULT_BILLING_UNAVAILABLE = 3;
+    public static final int RESULT_ITEM_UNAVAILABLE = 4;
+    public static final int RESULT_DEVELOPER_ERROR = 5;
+    public static final int RESULT_ERROR = 6;
+    public static final int RESULT_ITEM_ALREADY_OWNED = 7;
+    public static final int RESULT_ITEM_NOT_OWNED = 8;
 
     // Keys for the responses
-    static final String RESPONSE_CODE = "RESPONSE_CODE";
-    static final String DETAILS_LIST = "DETAILS_LIST";
-    static final String BUY_INTENT = "BUY_INTENT";
-    static final String INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
-    static final String INAPP_DATA_SIGNATURE = "INAPP_DATA_SIGNATURE";
-    static final String INAPP_PURCHASE_ITEM_LIST = "INAPP_PURCHASE_ITEM_LIST";
-    static final String INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
-    static final String INAPP_DATA_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
-    static final String INAPP_CONTINUATION_TOKEN = "INAPP_CONTINUATION_TOKEN";
+    public static final String RESPONSE_CODE = "RESPONSE_CODE";
+    public static final String DETAILS_LIST = "DETAILS_LIST";
+    public static final String BUY_INTENT = "BUY_INTENT";
+    public static final String INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
+    public static final String INAPP_DATA_SIGNATURE = "INAPP_DATA_SIGNATURE";
+    public static final String INAPP_PURCHASE_ITEM_LIST = "INAPP_PURCHASE_ITEM_LIST";
+    public static final String INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
+    public static final String INAPP_DATA_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
+    public static final String INAPP_CONTINUATION_TOKEN = "INAPP_CONTINUATION_TOKEN";
 
     // Param keys
-    static final String ITEM_ID_LIST = "ITEM_ID_LIST";
-    static final String ITEM_TYPE_LIST = "ITEM_TYPE_LIST";
+    public static final String ITEM_ID_LIST = "ITEM_ID_LIST";
+    public static final String ITEM_TYPE_LIST = "ITEM_TYPE_LIST";
 
     // Item types
     public static final String ITEM_TYPE_INAPP = "inapp";
