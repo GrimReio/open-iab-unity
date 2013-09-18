@@ -3,10 +3,16 @@ package org.onepf.oms;
 import android.content.Intent;
 import android.os.RemoteException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class AppstoreBinder extends IOpenAppstore.Stub {
 
     public static final String TAG = "OnePF_store";
     private static final String BILLING_BIND_INTENT = "org.onepf.oms.billing.BIND";
+
+    // package name - version
+    HashMap<String, Integer> _packageMap = new HashMap<String, Integer>();
 
     @Override
     public String getAppstoreName() throws RemoteException {
@@ -21,6 +27,7 @@ public class AppstoreBinder extends IOpenAppstore.Stub {
 
     @Override
     public boolean isBillingAvailable(String packageName) throws RemoteException {
+        // TODO: simulate some checks if needed
         return true;
     }
 

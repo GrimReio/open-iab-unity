@@ -14,7 +14,6 @@ public class PurchaseActivity extends Activity {
 
     public void onOkClick(View view) {
         Intent intent = getIntent();
-        Log.i(AppstoreBinder.TAG, intent.getExtras()+" **********");
         setResult(RESULT_OK, intent);
         finish();
     }

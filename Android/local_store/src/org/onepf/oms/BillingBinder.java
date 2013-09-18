@@ -5,8 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.util.Log;
-import org.onepf.oms.dto.Purchase;
+import org.onepf.oms.data.Database;
+import org.onepf.oms.data.Purchase;
+import org.onepf.oms.data.SkuDetails;
 
 import java.util.ArrayList;
 
@@ -46,10 +47,10 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
     public static final int PURCHASE_STATE_CANCELED = 1;
     public static final int PURCHASE_STATE_REFUNDED = 2;
 
-    final BillingDatabase _db;
+    final Database _db;
     final Context _context;
 
-    public BillingBinder(Context context, BillingDatabase database) {
+    public BillingBinder(Context context, Database database) {
         _db = database;
         _context = context;
     }
@@ -95,8 +96,9 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
 
         ArrayList<String> detailsList = new ArrayList<String>();
         for (String itemId : itemIdList) {
-            if (_db.hasSku(itemId)) {
-                detailsList.add(_db.getSkuDetails(itemId).toJson());
+            SkuDetails skuDetails = _db.getSkuDetails(packageName, itemId);
+            if (skuDetails != null) {
+                detailsList.add(skuDetails.toJson());
             }
         }
 
@@ -147,14 +149,16 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         PendingIntent pendingIntent;
         Intent intent = new Intent(_context, PurchaseActivity.class);
 
-//        if (!_db.getSkuDetails(sku).getType().equals(type)) {
-//            result.putInt(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
-//            return result;
-//        }
-
         Purchase purchase = _db.purchase(packageName, sku, developerPayload);
         if (purchase == null) {
-            intent.putExtra(RESPONSE_CODE, RESULT_ERROR);
+            SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
+            if (skuDetails == null) {
+                intent.putExtra(RESPONSE_CODE, RESULT_ITEM_UNAVAILABLE);
+            } else if (!skuDetails.getType().equals(type)) {
+                intent.putExtra(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
+            } else {
+                intent.putExtra(RESPONSE_CODE, RESULT_ERROR);
+            }
         } else {
             intent.putExtra(RESPONSE_CODE, RESULT_OK);
             intent.putExtra(INAPP_PURCHASE_DATA, purchase.toJson());
@@ -167,6 +171,7 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         return result;
     }
 
+    // TODO: implement with continuation token
     @Override
     public Bundle getPurchases(int apiVersion, String packageName, String type, String continuationToken) throws RemoteException {
         return new Bundle();

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.onepf.oms.dto;
+package org.onepf.oms.data;
 
 import android.util.Log;
 import org.json.JSONException;
@@ -37,6 +37,15 @@ public class SkuDetails {
         _title = name;
         _price = price;
         _description = description;
+    }
+
+    public SkuDetails(String json) throws JSONException {
+        JSONObject o = new JSONObject(json);
+        _sku = o.getString("productId");
+        _type = o.optString("type");
+        _price = o.optString("price");
+        _title = o.optString("title");
+        _description = o.optString("description");
     }
 
     public String toJson() {

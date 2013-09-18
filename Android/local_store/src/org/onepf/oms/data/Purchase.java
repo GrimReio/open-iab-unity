@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-package org.onepf.oms.dto;
+package org.onepf.oms.data;
 
 import android.util.Log;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.onepf.oms.AppstoreBinder;
 
