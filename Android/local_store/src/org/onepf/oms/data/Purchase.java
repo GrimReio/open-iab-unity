@@ -18,6 +18,7 @@ package org.onepf.oms.data;
 import android.util.Log;
 import org.json.JSONObject;
 import org.onepf.oms.AppstoreBinder;
+import org.onepf.oms.BillingApplication;
 
 /**
  * Represents an in-app billing purchase.
@@ -53,7 +54,7 @@ public class Purchase implements Cloneable {
             o.put("developerPayload", _developerPayload);
             o.put("purchaseToken", _token);
         } catch (Exception e) {
-            Log.e(AppstoreBinder.TAG, "Couldn't serialize " + getClass().getSimpleName());
+            Log.e(BillingApplication.TAG, "Couldn't serialize " + getClass().getSimpleName());
             return "";
         }
         return o.toString();

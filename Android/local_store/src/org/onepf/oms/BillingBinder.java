@@ -166,7 +166,7 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
             intent.putExtra(INAPP_DATA_SIGNATURE, "no_signature");
         }
 
-        pendingIntent =  PendingIntent.getActivity(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getActivity(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         result.putParcelable(BUY_INTENT, pendingIntent);
         return result;
     }

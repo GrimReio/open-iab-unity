@@ -10,6 +10,9 @@ public class Application {
 
     String _packageName;
     int _version;
+    boolean _installed;
+    boolean _billingActive;
+
     ArrayList<SkuDetails> _productList = new ArrayList<SkuDetails>();
 
     public Application(String name, int version) {
@@ -19,8 +22,12 @@ public class Application {
 
     public Application(String json) throws JSONException {
         JSONObject o = new JSONObject(json);
-        _packageName = o.optString("packageName");
-        _version = o.optInt("version");
+
+        _packageName = o.getString("packageName");
+        _version = o.optInt("version", 0);
+        _billingActive = o.optBoolean("installed", true);
+        _billingActive = o.optBoolean("billingActive", true);
+
         JSONArray products = o.getJSONArray("products");
         for (int i = 0; i < products.length(); ++i) {
             _productList.add(new SkuDetails(products.get(i).toString()));
@@ -33,6 +40,14 @@ public class Application {
 
     public int getVersion() {
         return _version;
+    }
+
+    public boolean installed() {
+        return _installed;
+    }
+
+    public boolean billingActive() {
+        return _billingActive;
     }
 
     public SkuDetails getSkuDetails(String sku) {

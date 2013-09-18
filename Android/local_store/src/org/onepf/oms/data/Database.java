@@ -1,10 +1,8 @@
 package org.onepf.oms.data;
 
-import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.onepf.oms.AppstoreBinder;
 import org.onepf.oms.BillingBinder;
 
 import java.util.ArrayList;
@@ -36,7 +34,7 @@ public class Database {
         return "no_token";
     }
 
-    Application getApplication(String packageName) {
+    public Application getApplication(String packageName) {
         for (Application app : _appList) {
             if (app.getPackageName().equals(packageName)) {
                 return app;
@@ -62,6 +60,4 @@ public class Database {
         }
         return new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(), BillingBinder.PURCHASE_STATE_PURCHASED, developerPayload, generateToken());
     }
-
-
 }

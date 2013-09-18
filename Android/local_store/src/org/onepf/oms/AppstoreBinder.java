@@ -1,15 +1,22 @@
 package org.onepf.oms;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
+import org.onepf.oms.data.Application;
+import org.onepf.oms.data.Database;
 
 public class AppstoreBinder extends IOpenAppstore.Stub {
 
-    public static final String TAG = "OnePF_store";
     private static final String BILLING_BIND_INTENT = "org.onepf.oms.billing.BIND";
+
+    final Database _db;
+    final Context _context;
+
+    public AppstoreBinder(AppstoreService context, Database database) {
+        _db = database;
+        _context = context;
+    }
 
     @Override
     public String getAppstoreName() throws RemoteException {
@@ -18,20 +25,20 @@ public class AppstoreBinder extends IOpenAppstore.Stub {
 
     @Override
     public boolean isPackageInstaller(String packageName) throws RemoteException {
-        // TODO: read "installed" package list, dev keys, SKUs, etc from text file
-        return true;
+        Application app = _db.getApplication(packageName);
+        return app != null && app.installed();
     }
 
     @Override
     public boolean isBillingAvailable(String packageName) throws RemoteException {
-        // TODO: simulate some checks if needed
-        return true;
+        Application app = _db.getApplication(packageName);
+        return app != null && app.billingActive();
     }
 
     @Override
     public int getPackageVersion(String packageName) throws RemoteException {
-        // TODO: read version from text file
-        return -1;
+        Application app = _db.getApplication(packageName);
+        return app == null ? -1 : app.getVersion();
     }
 
     @Override

@@ -18,7 +18,7 @@ package org.onepf.oms.data;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.onepf.oms.AppstoreBinder;
+import org.onepf.oms.BillingApplication;
 
 /**
  * Represents an in-app product's listing details.
@@ -57,7 +57,7 @@ public class SkuDetails {
             o.put("title", _title);
             o.put("description", _description);
         } catch (JSONException e) {
-            Log.e(AppstoreBinder.TAG, "Couldn't serialize " + getClass().getSimpleName());
+            Log.e(BillingApplication.TAG, "Couldn't serialize " + getClass().getSimpleName());
             return "";
         }
         return o.toString();

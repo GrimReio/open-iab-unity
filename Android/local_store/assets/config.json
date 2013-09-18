@@ -2,7 +2,9 @@
     "applications": [
         {
             "packageName": "org.onepf.trivialdrive",
-            "version": "0",
+            "version": "1",
+            "installed": "true",
+            "billingActive": "true",
             "products": [
                 {
                     "productId": "sku_gas",
