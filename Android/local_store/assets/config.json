@@ -12,6 +12,14 @@
                     "price": "50",
                     "title": "GAS",
                     "description": "car fuel"
+                },
+                {
+                    "productId": "sku_premium",
+                    "type": "inapp"
+                },
+                {
+                    "productId": "sku_infinite_gas",
+                    "type": "subs"
                 }
             ]
         }
