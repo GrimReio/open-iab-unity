@@ -176,12 +176,51 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         return result;
     }
 
-    // TODO: implement with continuation token
+    /**
+     * Returns the current SKUs owned by the user of the type and package name specified along with
+     * purchase information and a signature of the data to be validated.
+     * This will return all SKUs that have been purchased in V3 and managed items purchased using
+     * V1 and V2 that have not been consumed.
+     * @param apiVersion billing API version that the app is using
+     * @param packageName package name of the calling app
+     * @param type the type of the in-app items being requested
+     *        ("inapp" for one-time purchases and "subs" for subscription).
+     * @param continuationToken to be set as null for the first call, if the number of owned
+     *        skus are too many, a continuationToken is returned in the response bundle.
+     *        This method can be called again with the continuation token to get the next set of
+     *        owned skus.
+     * @return Bundle containing the following key-value pairs
+     *         "RESPONSE_CODE" with int value, RESULT_OK(0) if success, other response codes on
+     *              failure as listed above.
+     *         "INAPP_PURCHASE_ITEM_LIST" - StringArrayList containing the list of SKUs
+     *         "INAPP_PURCHASE_DATA_LIST" - StringArrayList containing the purchase information
+     *         "INAPP_DATA_SIGNATURE_LIST"- StringArrayList containing the signatures
+     *                                      of the purchase information
+     *         "INAPP_CONTINUATION_TOKEN" - String containing a continuation token for the
+     *                                      next set of in-app purchases. Only set if the
+     *                                      user has more owned skus than the current list.
+     */
     @Override
     public Bundle getPurchases(int apiVersion, String packageName, String type, String continuationToken) throws RemoteException {
-        return new Bundle();
+        Bundle result = new Bundle();
+        result.putInt(RESPONSE_CODE, RESULT_OK);
+
+        result.putStringArrayList(INAPP_PURCHASE_ITEM_LIST, new ArrayList<String>());
+        result.putStringArrayList(INAPP_PURCHASE_DATA_LIST, new ArrayList<String>());
+        result.putStringArrayList(INAPP_DATA_SIGNATURE_LIST, new ArrayList<String>());
+
+        return result;
     }
 
+    /**
+     * Consume the last purchase of the given SKU. This will result in this item being removed
+     * from all subsequent responses to getPurchases() and allow re-purchase of this item.
+     * @param apiVersion billing API version that the app is using
+     * @param packageName package name of the calling app
+     * @param purchaseToken token in the purchase information JSON that identifies the purchase
+     *        to be consumed
+     * @return 0 if consumption succeeded. Appropriate error values for failures.
+     */
     @Override
     public int consumePurchase(int apiVersion, String packageName, String purchaseToken) throws RemoteException {
         return _db.consume(packageName, purchaseToken);

@@ -15,7 +15,6 @@ public class Database {
 
     ArrayList<Application> _appList = new ArrayList<Application>();
     ArrayList<Purchase> _purchaseHistory = new ArrayList<Purchase>();
-    HashSet<Purchase> _consumeHistory = new HashSet<Purchase>();
 
     public Database() {
     }
@@ -70,14 +69,10 @@ public class Database {
     }
 
     public int consume(String packageName, String purchaseToken) {
-        for (Purchase p : _purchaseHistory) {
-            if (p.getToken().equals(purchaseToken)) {
-                if (_consumeHistory.contains(p)) {
-                    return BillingBinder.RESULT_ITEM_ALREADY_OWNED;
-                } else {
-                    _consumeHistory.add(p);
-                    return BillingBinder.RESULT_OK;
-                }
+        for (int i = _purchaseHistory.size()-1; i >= 0; --i) {
+            if (_purchaseHistory.get(i).getToken().equals(purchaseToken)) {
+                _purchaseHistory.remove(i);
+                return BillingBinder.RESULT_OK;
             }
         }
         return BillingBinder.RESULT_ITEM_NOT_OWNED;
