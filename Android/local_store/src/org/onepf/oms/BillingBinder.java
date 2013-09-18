@@ -10,6 +10,8 @@ import org.onepf.oms.data.Purchase;
 import org.onepf.oms.data.SkuDetails;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class BillingBinder extends IOpenInAppBillingService.Stub {
 
@@ -55,6 +57,15 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         _context = context;
     }
 
+    /**
+     * Checks support for the requested billing API version, package and in-app type.
+     * Minimum API version supported by this interface is 3.
+     * @param apiVersion the billing version which the app is using
+     * @param packageName the package name of the calling app
+     * @param type type of the in-app item being purchased "inapp" for one-time purchases
+     *        and "subs" for subscription.
+     * @return RESULT_OK(0) on success, corresponding result code on failures
+     */
     @Override
     public int isBillingSupported(int apiVersion, String packageName, String type) throws RemoteException {
         if (apiVersion >= 3 &&
@@ -205,9 +216,21 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         Bundle result = new Bundle();
         result.putInt(RESPONSE_CODE, RESULT_OK);
 
-        result.putStringArrayList(INAPP_PURCHASE_ITEM_LIST, new ArrayList<String>());
-        result.putStringArrayList(INAPP_PURCHASE_DATA_LIST, new ArrayList<String>());
-        result.putStringArrayList(INAPP_DATA_SIGNATURE_LIST, new ArrayList<String>());
+        ArrayList<Purchase> purchaseHistory = _db.getPurchaseHistory();
+        int size = purchaseHistory.size();
+
+        ArrayList<String> purchaseItemList = new ArrayList<String>(size);
+        ArrayList<String> purchaseDataList = new ArrayList<String>(size);
+        ArrayList<String> purchaseSignatureList =  new ArrayList<String>(Collections.nCopies(size, "no_signature"));
+
+        for (int i = 0; i < size; ++i) {
+            purchaseItemList.set(i, purchaseHistory.get(i).getSku());
+            purchaseDataList.set(i, purchaseHistory.get(i).toJson());
+        }
+
+        result.putStringArrayList(INAPP_PURCHASE_ITEM_LIST, purchaseItemList);
+        result.putStringArrayList(INAPP_PURCHASE_DATA_LIST, purchaseDataList);
+        result.putStringArrayList(INAPP_DATA_SIGNATURE_LIST, purchaseSignatureList);
 
         return result;
     }

@@ -16,6 +16,10 @@ public class Database {
     ArrayList<Application> _appList = new ArrayList<Application>();
     ArrayList<Purchase> _purchaseHistory = new ArrayList<Purchase>();
 
+    public ArrayList<Purchase> getPurchaseHistory() {
+        return _purchaseHistory;
+    }
+
     public Database() {
     }
 
@@ -62,9 +66,7 @@ public class Database {
         }
         Purchase purchase = new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(), BillingBinder.PURCHASE_STATE_PURCHASED,
                 developerPayload, generateToken(packageName, sku));
-        if (purchase != null) {
-            _purchaseHistory.add(purchase);
-        }
+        _purchaseHistory.add(purchase);
         return purchase;
     }
 
