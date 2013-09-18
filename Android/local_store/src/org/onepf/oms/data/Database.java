@@ -6,12 +6,16 @@ import org.json.JSONObject;
 import org.onepf.oms.BillingBinder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.UUID;
 
 public class Database {
 
     long _orderid = 0;
 
     ArrayList<Application> _appList = new ArrayList<Application>();
+    ArrayList<Purchase> _purchaseHistory = new ArrayList<Purchase>();
+    HashSet<Purchase> _consumeHistory = new HashSet<Purchase>();
 
     public Database() {
     }
@@ -29,9 +33,8 @@ public class Database {
         return Long.toString(_orderid++);
     }
 
-    // TODO: implement
-    String generateToken() {
-        return "no_token";
+    String generateToken(String packageName, String sku) {
+        return packageName +"."+ sku +"."+ UUID.randomUUID();
     }
 
     public Application getApplication(String packageName) {
@@ -58,6 +61,25 @@ public class Database {
         if (skuDetails == null) {
             return null;
         }
-        return new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(), BillingBinder.PURCHASE_STATE_PURCHASED, developerPayload, generateToken());
+        Purchase purchase = new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(), BillingBinder.PURCHASE_STATE_PURCHASED,
+                developerPayload, generateToken(packageName, sku));
+        if (purchase != null) {
+            _purchaseHistory.add(purchase);
+        }
+        return purchase;
+    }
+
+    public int consume(String packageName, String purchaseToken) {
+        for (Purchase p : _purchaseHistory) {
+            if (p.getToken().equals(purchaseToken)) {
+                if (_consumeHistory.contains(p)) {
+                    return BillingBinder.RESULT_ITEM_ALREADY_OWNED;
+                } else {
+                    _consumeHistory.add(p);
+                    return BillingBinder.RESULT_OK;
+                }
+            }
+        }
+        return BillingBinder.RESULT_ITEM_NOT_OWNED;
     }
 }

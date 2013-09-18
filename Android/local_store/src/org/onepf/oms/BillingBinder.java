@@ -184,7 +184,6 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
 
     @Override
     public int consumePurchase(int apiVersion, String packageName, String purchaseToken) throws RemoteException {
-        // TODO: perform some checks
-        return RESULT_OK;
+        return _db.consume(packageName, purchaseToken);
     }
 }
