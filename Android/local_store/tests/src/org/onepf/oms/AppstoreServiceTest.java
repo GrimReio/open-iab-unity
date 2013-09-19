@@ -1,6 +1,7 @@
 package org.onepf.oms;
 
 import android.content.Intent;
+import android.os.RemoteException;
 import android.test.ServiceTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -72,5 +73,29 @@ public class AppstoreServiceTest extends ServiceTestCase<AppstoreService> {
         assertTrue(_binder != null);
         assertTrue(_app != null);
         assertTrue(_app.getDatabase() != null);
+    }
+
+    @SmallTest
+    public void testIsPackageInstaller() throws RemoteException {
+        start("{\"applications\":[{\"packageName\":\"org.some.app\",\"installed\":\"true\"}]}");
+        assertTrue(_binder.isPackageInstaller("org.some.app"));
+    }
+
+    @SmallTest
+    public void testIsNotPackageInstaller() throws RemoteException {
+        start("{\"applications\":[{\"packageName\":\"org.some.app\",\"installed\":\"false\"}]}");
+        assertFalse(_binder.isPackageInstaller("org.some.app"));
+    }
+
+    @SmallTest
+    public void testIsBillingAvailable() throws RemoteException {
+        start("{\"applications\":[{\"packageName\":\"org.some.app\",\"billingActive\":\"true\"}]}");
+        assertTrue(_binder.isBillingAvailable("org.some.app"));
+    }
+
+    @SmallTest
+    public void testIsNotBillingAvailable() throws RemoteException {
+        start("{\"applications\":[{\"packageName\":\"org.some.app\",\"billingActive\":\"false\"}]}");
+        assertFalse(_binder.isBillingAvailable("org.some.app"));
     }
 }
