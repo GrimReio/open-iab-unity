@@ -9,12 +9,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class BillingApplication extends Application {
+public class BillingApplication extends Application implements IBillingApplication {
 
     public static final String TAG = "OnePF_store";
 
     Database _database;
 
+    @Override
     public Database getDatabase() {
         return _database;
     }

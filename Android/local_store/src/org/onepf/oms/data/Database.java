@@ -23,6 +23,8 @@ public class Database {
     }
 
     public Database(String json) throws JSONException {
+        if (json == null || json.equals("")) return;
+
         JSONObject o = new JSONObject(json);
         JSONArray applicationList = o.getJSONArray("applications");
         for (int i = 0; i < applicationList.length(); ++i) {
