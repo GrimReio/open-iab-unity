@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 import org.onepf.oms.data.Database;
 import org.onepf.oms.data.Purchase;
 import org.onepf.oms.data.SkuDetails;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class BillingBinder extends IOpenInAppBillingService.Stub {
@@ -165,7 +165,7 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         PendingIntent pendingIntent;
         Intent intent = new Intent(_context, PurchaseActivity.class);
 
-        Purchase purchase = _db.purchase(packageName, sku, developerPayload);
+        Purchase purchase = _db.purchase(packageName, sku, developerPayload, true);
         if (purchase == null) {
             SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
             if (skuDetails == null) {
@@ -216,16 +216,16 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         Bundle result = new Bundle();
         result.putInt(RESPONSE_CODE, RESULT_OK);
 
-        ArrayList<Purchase> purchaseHistory = _db.getPurchaseHistory();
+        ArrayList<Purchase> purchaseHistory = true ? getPurchasesFormConfig(packageName) : _db.getPurchaseHistory();
         int size = purchaseHistory.size();
 
         ArrayList<String> purchaseItemList = new ArrayList<String>(size);
         ArrayList<String> purchaseDataList = new ArrayList<String>(size);
-        ArrayList<String> purchaseSignatureList =  new ArrayList<String>(Collections.nCopies(size, "no_signature"));
+        ArrayList<String> purchaseSignatureList = new ArrayList<String>(Collections.nCopies(size, "no_signature"));
 
         for (int i = 0; i < size; ++i) {
-            purchaseItemList.set(i, purchaseHistory.get(i).getSku());
-            purchaseDataList.set(i, purchaseHistory.get(i).toJson());
+            purchaseItemList.add(purchaseHistory.get(i).getSku());
+            purchaseDataList.add(purchaseHistory.get(i).toJson());
         }
 
         result.putStringArrayList(INAPP_PURCHASE_ITEM_LIST, purchaseItemList);
@@ -247,5 +247,19 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
     @Override
     public int consumePurchase(int apiVersion, String packageName, String purchaseToken) throws RemoteException {
         return _db.consume(packageName, purchaseToken);
+    }
+
+    private ArrayList<Purchase> getPurchasesFormConfig(String packageName) {
+        ArrayList<Purchase> purchaseHistory = new ArrayList<Purchase>();
+        ArrayList<String> inventoryList = _db.getApplication(packageName).getInventoryList();
+        for (String sku : inventoryList) {
+            Purchase purchase = _db.purchase(packageName, sku, "", false);
+            if (purchase == null) {
+                Log.e(BillingApplication.TAG, "Couldn't create purchase from config: " + sku);
+            } else {
+                purchaseHistory.add(purchase);
+            }
+        }
+        return purchaseHistory;
     }
 }

@@ -14,6 +14,7 @@ public class Application {
     boolean _billingActive;
 
     ArrayList<SkuDetails> _productList = new ArrayList<SkuDetails>();
+    ArrayList<String> _inventoryList = new ArrayList<String>();
 
     public Application(String name, int version) {
         _packageName = name;
@@ -32,6 +33,12 @@ public class Application {
         for (int i = 0; i < products.length(); ++i) {
             _productList.add(new SkuDetails(products.get(i).toString()));
         }
+
+        JSONArray inventoryList = o.getJSONArray("inventory");
+        for (int i = 0; i < inventoryList.length(); ++i) {
+            String sku = (String) inventoryList.get(i);
+            _inventoryList.add(sku);
+        }
     }
 
     public String getPackageName() {
@@ -48,6 +55,10 @@ public class Application {
 
     public boolean billingActive() {
         return _billingActive;
+    }
+
+    public ArrayList<String> getInventoryList() {
+        return _inventoryList;
     }
 
     public SkuDetails getSkuDetails(String sku) {

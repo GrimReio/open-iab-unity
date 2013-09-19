@@ -5,6 +5,7 @@
             "version": "1",
             "installed": "true",
             "billingActive": "true",
+
             "products": [
                 {
                     "productId": "sku_gas",
@@ -21,6 +22,11 @@
                     "productId": "sku_infinite_gas",
                     "type": "subs"
                 }
+            ],
+
+            "inventory": [
+                "sku_premium",
+                "sku_infinite_gas"
             ]
         }
     ]

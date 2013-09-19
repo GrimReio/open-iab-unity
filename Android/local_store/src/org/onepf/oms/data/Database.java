@@ -6,14 +6,13 @@ import org.json.JSONObject;
 import org.onepf.oms.BillingBinder;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.UUID;
 
 public class Database {
 
     long _orderid = 0;
 
-    ArrayList<Application> _appList = new ArrayList<Application>();
+    ArrayList<Application> _applicationList = new ArrayList<Application>();
     ArrayList<Purchase> _purchaseHistory = new ArrayList<Purchase>();
 
     public ArrayList<Purchase> getPurchaseHistory() {
@@ -28,7 +27,7 @@ public class Database {
         JSONArray applicationList = o.getJSONArray("applications");
         for (int i = 0; i < applicationList.length(); ++i) {
             JSONObject app = (JSONObject) applicationList.get(i);
-            _appList.add(new Application(app.toString()));
+            _applicationList.add(new Application(app.toString()));
         }
     }
 
@@ -41,7 +40,7 @@ public class Database {
     }
 
     public Application getApplication(String packageName) {
-        for (Application app : _appList) {
+        for (Application app : _applicationList) {
             if (app.getPackageName().equals(packageName)) {
                 return app;
             }
@@ -55,7 +54,7 @@ public class Database {
     }
 
     // returns null if failed
-    public Purchase purchase(String packageName, String sku, String developerPayload) {
+    public Purchase purchase(String packageName, String sku, String developerPayload, boolean cachePurchase) {
         Application app = getApplication(packageName);
         if (app == null) {
             return null;
@@ -66,7 +65,10 @@ public class Database {
         }
         Purchase purchase = new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(), BillingBinder.PURCHASE_STATE_PURCHASED,
                 developerPayload, generateToken(packageName, sku));
-        _purchaseHistory.add(purchase);
+
+        if (cachePurchase) {
+            _purchaseHistory.add(purchase);
+        }
         return purchase;
     }
 
