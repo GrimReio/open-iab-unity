@@ -10,7 +10,7 @@ public class AppstoreServiceTest extends ServiceTestCase<AppstoreService> {
     AppstoreBinder _binder;
     MockBillingApplication _app;
 
-    String _testJson = "{\"applications\":[{\"packageName\":\"org.onepf.trivialdrive\",\"version\":\"1\",\"installed\":\"true\",\"billingActive\":\"true\",\"products\":[{\"productId\":\"sku_gas\",\"type\":\"inapp\",\"price\":\"50\",\"title\":\"GAS\",\"description\":\"car fuel\"},{\"productId\":\"sku_premium\",\"type\":\"inapp\"},{\"productId\":\"sku_infinite_gas\",\"type\":\"subs\"}],\"inventory\":[\"sku_premium\",\"sku_infinite_gas\"]}]}";
+    final String _jsonConfig = "{\"applications\":[{\"packageName\":\"org.onepf.trivialdrive\",\"version\":\"1\",\"installed\":\"true\",\"billingActive\":\"true\",\"products\":[{\"productId\":\"sku_gas\",\"type\":\"inapp\",\"price\":\"50\",\"title\":\"GAS\",\"description\":\"car fuel\"},{\"productId\":\"sku_premium\",\"type\":\"inapp\"},{\"productId\":\"sku_infinite_gas\",\"type\":\"subs\"}],\"inventory\":[\"sku_premium\",\"sku_infinite_gas\"]}]}";
 
     public AppstoreServiceTest() {
         super(AppstoreService.class);
@@ -69,7 +69,7 @@ public class AppstoreServiceTest extends ServiceTestCase<AppstoreService> {
 
     @SmallTest
     public void testProperJsonBind() {
-        start(_testJson);
+        start(_jsonConfig);
         assertTrue(_binder != null);
         assertTrue(_app != null);
         assertTrue(_app.getDatabase() != null);
@@ -97,5 +97,19 @@ public class AppstoreServiceTest extends ServiceTestCase<AppstoreService> {
     public void testIsNotBillingAvailable() throws RemoteException {
         start("{\"applications\":[{\"packageName\":\"org.some.app\",\"billingActive\":\"false\"}]}");
         assertFalse(_binder.isBillingAvailable("org.some.app"));
+    }
+
+    @SmallTest
+    public void testVersion() throws RemoteException {
+        start("{\"applications\":[{\"packageName\":\"org.some.app\",\"version\":\"666\"}]}");
+        assertTrue(_binder.getPackageVersion("org.some.app") == 666);
+    }
+
+    @SmallTest
+    public void testBillingServiceIntent() throws RemoteException {
+        start("");
+        Intent intent = _binder.getBillingServiceIntent();
+        assertTrue(intent != null);
+        assertEquals(intent.getAction(), "org.onepf.oms.billing.BIND");
     }
 }

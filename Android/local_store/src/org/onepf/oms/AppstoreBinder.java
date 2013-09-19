@@ -48,21 +48,21 @@ public class AppstoreBinder extends IOpenAppstore.Stub {
 
     @Override
     public Intent getProductPageIntent(String packageName) throws RemoteException {
-        return null;
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public Intent getRateItPageIntent(String packageName) throws RemoteException {
-        return null;
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public Intent getSameDeveloperPageIntent(String packageName) throws RemoteException {
-        return null;
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
     public boolean areOutsideLinksAllowed() throws RemoteException {
-        return false;
+        throw new UnsupportedOperationException("Not implemented");
     }
 }
