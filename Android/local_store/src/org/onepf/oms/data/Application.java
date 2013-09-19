@@ -26,18 +26,22 @@ public class Application {
 
         _packageName = o.getString("packageName");
         _version = o.optInt("version", 0);
-        _billingActive = o.optBoolean("installed", true);
+        _installed = o.optBoolean("installed", true);
         _billingActive = o.optBoolean("billingActive", true);
 
-        JSONArray products = o.getJSONArray("products");
-        for (int i = 0; i < products.length(); ++i) {
-            _productList.add(new SkuDetails(products.get(i).toString()));
+        JSONArray products = o.optJSONArray("products");
+        if (products != null) {
+            for (int i = 0; i < products.length(); ++i) {
+                _productList.add(new SkuDetails(products.get(i).toString()));
+            }
         }
 
-        JSONArray inventoryList = o.getJSONArray("inventory");
-        for (int i = 0; i < inventoryList.length(); ++i) {
-            String sku = (String) inventoryList.get(i);
-            _inventoryList.add(sku);
+        JSONArray inventoryList = o.optJSONArray("inventory");
+        if (inventoryList != null) {
+            for (int i = 0; i < inventoryList.length(); ++i) {
+                String sku = (String) inventoryList.get(i);
+                _inventoryList.add(sku);
+            }
         }
     }
 
