@@ -127,12 +127,65 @@ public class BillingServiceTest extends ServiceTestCase<BillingService> {
     }
 
 
-    @MediumTest
-    public void testGetBuyIntent_proper() throws RemoteException, JSONException {
+    @SmallTest
+    public void testGetBuyIntent_proper() throws RemoteException {
         start(_jsonConfig);
+
         Bundle result = _binder.getBuyIntent(3, "org.onepf.trivialdrive", "sku_gas", BillingBinder.ITEM_TYPE_INAPP, "payload");
         assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_OK);
 
+        result = _binder.getBuyIntent(3, "org.onepf.trivialdrive", "sku_infinite_gas", BillingBinder.ITEM_TYPE_SUBS, "payload");
+        assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_OK);
     }
 
+    @SmallTest
+    public void testGetPurchases_wrong() throws RemoteException, JSONException {
+        start(_jsonConfig);
+
+        Bundle result = _binder.getPurchases(2, "org.onepf.trivialdrive", BillingBinder.ITEM_TYPE_INAPP, "");
+        assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_DEVELOPER_ERROR);
+
+        result = _binder.getPurchases(3, "org.onepf.trivialdrive", "wrong_type", "");
+        assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_DEVELOPER_ERROR);
+    }
+
+    @MediumTest
+    public void testGetPurchases() throws RemoteException, JSONException {
+        start(_jsonConfig);
+
+        // No token
+        Bundle result = _binder.getPurchases(3, "org.onepf.trivialdrive", BillingBinder.ITEM_TYPE_INAPP, null);
+        assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_OK);
+
+        // INAPP
+        result = _binder.getPurchases(3, "org.onepf.trivialdrive", BillingBinder.ITEM_TYPE_INAPP, "");
+        assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_OK);
+
+        ArrayList<String> inappPurchaseItemList = result.getStringArrayList(BillingBinder.INAPP_PURCHASE_ITEM_LIST);
+        ArrayList<String> inappPurchaseDataList = result.getStringArrayList(BillingBinder.INAPP_PURCHASE_DATA_LIST);
+        ArrayList<String> inappDataSignatureList = result.getStringArrayList(BillingBinder.INAPP_DATA_SIGNATURE_LIST);
+
+        assertTrue(inappPurchaseItemList.size() == inappPurchaseDataList.size() && inappPurchaseItemList.size() == inappDataSignatureList.size() && inappPurchaseItemList.size() == 1);
+        assertFalse(result.containsKey(BillingBinder.INAPP_CONTINUATION_TOKEN));
+        assertEquals(inappPurchaseItemList.get(0), "sku_premium");
+
+        JSONObject o = new JSONObject(inappPurchaseDataList.get(0));
+        assertEquals(o.getString("productId"), "sku_premium");
+
+
+        // SUBS
+        result = _binder.getPurchases(3, "org.onepf.trivialdrive", BillingBinder.ITEM_TYPE_SUBS, "");
+        assertEquals(result.getInt(BillingBinder.RESPONSE_CODE), BillingBinder.RESULT_OK);
+
+        inappPurchaseItemList = result.getStringArrayList(BillingBinder.INAPP_PURCHASE_ITEM_LIST);
+        inappPurchaseDataList = result.getStringArrayList(BillingBinder.INAPP_PURCHASE_DATA_LIST);
+        inappDataSignatureList = result.getStringArrayList(BillingBinder.INAPP_DATA_SIGNATURE_LIST);
+
+        assertTrue(inappPurchaseItemList.size() == inappPurchaseDataList.size() && inappPurchaseItemList.size() == inappDataSignatureList.size() && inappPurchaseItemList.size() == 1);
+        assertFalse(result.containsKey(BillingBinder.INAPP_CONTINUATION_TOKEN));
+        assertEquals(inappPurchaseItemList.get(0), "sku_infinite_gas");
+
+        o = new JSONObject(inappPurchaseDataList.get(0));
+        assertEquals(o.getString("productId"), "sku_infinite_gas");
+    }
 }

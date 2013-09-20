@@ -218,7 +218,7 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
     public Bundle getPurchases(int apiVersion, String packageName, String type, String continuationToken) throws RemoteException {
         Bundle result = new Bundle();
 
-        if (apiVersion < 3) {
+        if (apiVersion < 3 || !(type.equals(ITEM_TYPE_INAPP) || type.equals(ITEM_TYPE_SUBS))) {
             result.putInt(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
             return result;
         }
@@ -226,16 +226,16 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         result.putInt(RESPONSE_CODE, RESULT_OK);
 
         // TODO: consider to restore purchases from persistent storage
-        ArrayList<Purchase> purchaseHistory = getPurchasesFormConfig(packageName);
+        ArrayList<Purchase> purchaseHistory = getPurchasesFormConfig(packageName, type);
         int size = purchaseHistory.size();
 
         ArrayList<String> purchaseItemList = new ArrayList<String>(size);
         ArrayList<String> purchaseDataList = new ArrayList<String>(size);
         ArrayList<String> purchaseSignatureList = new ArrayList<String>(Collections.nCopies(size, "no_signature"));
 
-        for (int i = 0; i < size; ++i) {
-            purchaseItemList.add(purchaseHistory.get(i).getSku());
-            purchaseDataList.add(purchaseHistory.get(i).toJson());
+        for (Purchase aPurchaseHistory : purchaseHistory) {
+            purchaseItemList.add(aPurchaseHistory.getSku());
+            purchaseDataList.add(aPurchaseHistory.toJson());
         }
 
         result.putStringArrayList(INAPP_PURCHASE_ITEM_LIST, purchaseItemList);
@@ -259,10 +259,17 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         return apiVersion < 3 ? RESULT_DEVELOPER_ERROR : _db.consume(purchaseToken);
     }
 
-    private ArrayList<Purchase> getPurchasesFormConfig(String packageName) {
+    private ArrayList<Purchase> getPurchasesFormConfig(String packageName, String type) {
         ArrayList<Purchase> purchaseHistory = new ArrayList<Purchase>();
         ArrayList<String> inventoryList = _db.getApplication(packageName).getInventoryList();
+        ArrayList<String> currentTypeInventoryList = new ArrayList<String>();
         for (String sku : inventoryList) {
+            SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
+            if (skuDetails != null && skuDetails.getType().equals(type)) {
+                currentTypeInventoryList.add(sku);
+            }
+        }
+        for (String sku : currentTypeInventoryList) {
             Purchase purchase = _db.createPurchase(packageName, sku, "");
             if (purchase == null) {
                 Log.e(BillingApplication.TAG, "Couldn't create purchase from config: " + sku);
