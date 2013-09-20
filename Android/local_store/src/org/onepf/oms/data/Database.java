@@ -1,8 +1,12 @@
 package org.onepf.oms.data;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.onepf.oms.BillingApplication;
 import org.onepf.oms.BillingBinder;
 
 import java.util.ArrayList;
@@ -14,10 +18,6 @@ public class Database {
 
     ArrayList<Application> _applicationList = new ArrayList<Application>();
     ArrayList<Purchase> _purchaseHistory = new ArrayList<Purchase>();
-
-    public ArrayList<Purchase> getPurchaseHistory() {
-        return _purchaseHistory;
-    }
 
     public Database() {
     }
@@ -56,7 +56,7 @@ public class Database {
     }
 
     // returns null if failed
-    public Purchase purchase(String packageName, String sku, String developerPayload, boolean cachePurchase) {
+    public Purchase createPurchase(String packageName, String sku, String developerPayload) {
         Application app = getApplication(packageName);
         if (app == null) {
             return null;
@@ -65,16 +65,16 @@ public class Database {
         if (skuDetails == null) {
             return null;
         }
-        Purchase purchase = new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(), BillingBinder.PURCHASE_STATE_PURCHASED,
+        return new Purchase(nextOrderId(), packageName, sku, System.currentTimeMillis(),
+                BillingBinder.PURCHASE_STATE_PURCHASED,
                 developerPayload, generateToken(packageName, sku));
-
-        if (cachePurchase) {
-            _purchaseHistory.add(purchase);
-        }
-        return purchase;
     }
 
-    public int consume(String packageName, String purchaseToken) {
+    public void storePurchase(Purchase purchase) {
+        _purchaseHistory.add(purchase);
+    }
+
+    public int consume(String purchaseToken) {
         for (int i = _purchaseHistory.size()-1; i >= 0; --i) {
             if (_purchaseHistory.get(i).getToken().equals(purchaseToken)) {
                 _purchaseHistory.remove(i);

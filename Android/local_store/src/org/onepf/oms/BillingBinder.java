@@ -3,6 +3,8 @@ package org.onepf.oms;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -14,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class BillingBinder extends IOpenInAppBillingService.Stub {
+
+    public static final String PURCHASE_COMPLETE_INTENT = "org.onepf.oms.PURCHASE_COMPLETE";
 
     // Response result codes
     public static final int RESULT_OK = 0;
@@ -163,30 +167,25 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         Bundle result = new Bundle();
 
         PendingIntent pendingIntent;
-        Intent intent = new Intent(_context, PurchaseActivity.class);
+        Intent purchaseIntent = new Intent(_context, PurchaseActivity.class);
 
-        if (apiVersion < 3) {
-            intent.putExtra(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
+        if (apiVersion < 3 || !(type.equals(ITEM_TYPE_INAPP) || type.equals(ITEM_TYPE_SUBS))) {
+            result.putInt(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
         } else {
-            Purchase purchase = _db.purchase(packageName, sku, developerPayload, true);
-            if (purchase == null) {
-                SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
-                if (skuDetails == null) {
-                    intent.putExtra(RESPONSE_CODE, RESULT_ITEM_UNAVAILABLE);
-                } else if (!skuDetails.getType().equals(type)) {
-                    intent.putExtra(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
-                } else {
-                    intent.putExtra(RESPONSE_CODE, RESULT_ERROR);
-                }
+            SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
+            if (skuDetails == null) {
+                result.putInt(RESPONSE_CODE, RESULT_ITEM_UNAVAILABLE);
+            } else if (!skuDetails.getType().equals(type)) {
+                result.putInt(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
             } else {
-                intent.putExtra(RESPONSE_CODE, RESULT_OK);
-                intent.putExtra(INAPP_PURCHASE_DATA, purchase.toJson());
-                // TODO: create signature properly!
-                intent.putExtra(INAPP_DATA_SIGNATURE, "no_signature");
+                purchaseIntent.putExtra("packageName", packageName);
+                purchaseIntent.putExtra("sku", sku);
+                purchaseIntent.putExtra("developerPayload", developerPayload);
+                result.putInt(RESPONSE_CODE, RESULT_OK);
             }
         }
 
-        pendingIntent = PendingIntent.getActivity(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getActivity(_context, 0, purchaseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         result.putParcelable(BUY_INTENT, pendingIntent);
         return result;
     }
@@ -226,7 +225,8 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
 
         result.putInt(RESPONSE_CODE, RESULT_OK);
 
-        ArrayList<Purchase> purchaseHistory = true ? getPurchasesFormConfig(packageName) : _db.getPurchaseHistory();
+        // TODO: consider to restore purchases from persistent storage
+        ArrayList<Purchase> purchaseHistory = getPurchasesFormConfig(packageName);
         int size = purchaseHistory.size();
 
         ArrayList<String> purchaseItemList = new ArrayList<String>(size);
@@ -256,14 +256,14 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
      */
     @Override
     public int consumePurchase(int apiVersion, String packageName, String purchaseToken) throws RemoteException {
-        return apiVersion < 3 ? RESULT_DEVELOPER_ERROR : _db.consume(packageName, purchaseToken);
+        return apiVersion < 3 ? RESULT_DEVELOPER_ERROR : _db.consume(purchaseToken);
     }
 
     private ArrayList<Purchase> getPurchasesFormConfig(String packageName) {
         ArrayList<Purchase> purchaseHistory = new ArrayList<Purchase>();
         ArrayList<String> inventoryList = _db.getApplication(packageName).getInventoryList();
         for (String sku : inventoryList) {
-            Purchase purchase = _db.purchase(packageName, sku, "", false);
+            Purchase purchase = _db.createPurchase(packageName, sku, "");
             if (purchase == null) {
                 Log.e(BillingApplication.TAG, "Couldn't create purchase from config: " + sku);
             } else {
