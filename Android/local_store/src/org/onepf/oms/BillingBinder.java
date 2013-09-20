@@ -98,7 +98,7 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
     public Bundle getSkuDetails(int apiVersion, String packageName, String type, Bundle skusBundle) throws RemoteException {
         Bundle result = new Bundle();
 
-        if (!skusBundle.containsKey(ITEM_ID_LIST)) {
+        if (!skusBundle.containsKey(ITEM_ID_LIST) || apiVersion < 3) {
             result.putInt(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
             return result;
         }
@@ -165,21 +165,25 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
         PendingIntent pendingIntent;
         Intent intent = new Intent(_context, PurchaseActivity.class);
 
-        Purchase purchase = _db.purchase(packageName, sku, developerPayload, true);
-        if (purchase == null) {
-            SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
-            if (skuDetails == null) {
-                intent.putExtra(RESPONSE_CODE, RESULT_ITEM_UNAVAILABLE);
-            } else if (!skuDetails.getType().equals(type)) {
-                intent.putExtra(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
-            } else {
-                intent.putExtra(RESPONSE_CODE, RESULT_ERROR);
-            }
+        if (apiVersion < 3) {
+            intent.putExtra(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
         } else {
-            intent.putExtra(RESPONSE_CODE, RESULT_OK);
-            intent.putExtra(INAPP_PURCHASE_DATA, purchase.toJson());
-            // TODO: create signature properly!
-            intent.putExtra(INAPP_DATA_SIGNATURE, "no_signature");
+            Purchase purchase = _db.purchase(packageName, sku, developerPayload, true);
+            if (purchase == null) {
+                SkuDetails skuDetails = _db.getSkuDetails(packageName, sku);
+                if (skuDetails == null) {
+                    intent.putExtra(RESPONSE_CODE, RESULT_ITEM_UNAVAILABLE);
+                } else if (!skuDetails.getType().equals(type)) {
+                    intent.putExtra(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
+                } else {
+                    intent.putExtra(RESPONSE_CODE, RESULT_ERROR);
+                }
+            } else {
+                intent.putExtra(RESPONSE_CODE, RESULT_OK);
+                intent.putExtra(INAPP_PURCHASE_DATA, purchase.toJson());
+                // TODO: create signature properly!
+                intent.putExtra(INAPP_DATA_SIGNATURE, "no_signature");
+            }
         }
 
         pendingIntent = PendingIntent.getActivity(_context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -214,6 +218,12 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
     @Override
     public Bundle getPurchases(int apiVersion, String packageName, String type, String continuationToken) throws RemoteException {
         Bundle result = new Bundle();
+
+        if (apiVersion < 3) {
+            result.putInt(RESPONSE_CODE, RESULT_DEVELOPER_ERROR);
+            return result;
+        }
+
         result.putInt(RESPONSE_CODE, RESULT_OK);
 
         ArrayList<Purchase> purchaseHistory = true ? getPurchasesFormConfig(packageName) : _db.getPurchaseHistory();
@@ -246,7 +256,7 @@ public class BillingBinder extends IOpenInAppBillingService.Stub {
      */
     @Override
     public int consumePurchase(int apiVersion, String packageName, String purchaseToken) throws RemoteException {
-        return _db.consume(packageName, purchaseToken);
+        return apiVersion < 3 ? RESULT_DEVELOPER_ERROR : _db.consume(packageName, purchaseToken);
     }
 
     private ArrayList<Purchase> getPurchasesFormConfig(String packageName) {
