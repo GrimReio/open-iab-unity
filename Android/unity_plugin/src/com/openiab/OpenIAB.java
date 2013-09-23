@@ -198,6 +198,9 @@ public class OpenIAB {
         public void onConsumeFinished(Purchase purchase, IabResult result) {
             Log.d(TAG, "Consumption finished. Purchase: " + purchase + ", result: " + result);
 
+            String sku = purchase.getSku();
+            purchase.setSku(OpenIabHelper.getSku(purchase.getAppstoreName(), sku));
+
             if (result.isFailure()) {
                 Log.e(TAG, "Error while consuming: " + result);
                 UnityPlayer.UnitySendMessage(EVENT_MANAGER, CONSUME_PURCHASE_FAILED_CALLBACK, result.getMessage());

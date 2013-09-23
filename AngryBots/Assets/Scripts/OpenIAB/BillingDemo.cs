@@ -37,6 +37,8 @@ public class BillingDemo : MonoBehaviour {
     [SerializeField]
     private PlayerHat _playerHat = null;
 
+    private const string STORE_ONEPF = "org.onepf.store";
+
     #region Billing
     private void Awake() {
         OpenIABEventManager.billingSupportedEvent += OnBillingSupported;
@@ -50,7 +52,10 @@ public class BillingDemo : MonoBehaviour {
     }
 
     private void Start() {
-        OpenIAB.mapSku(SKU_INFINITE_AMMO, OpenIAB.STORE_AMAZON, "sku_infinite_ammo");
+        OpenIAB.mapSku(SKU_MEDKIT, STORE_ONEPF, "onepf.sku_medkit");
+        OpenIAB.mapSku(SKU_AMMO, STORE_ONEPF, "onepf.sku_ammo");
+        OpenIAB.mapSku(SKU_COWBOY_HAT, STORE_ONEPF, "onepf.sku_cowboy_hat");
+        OpenIAB.mapSku(SKU_INFINITE_AMMO, STORE_ONEPF, "onepf.sku_infinite_ammo");
 
         OpenIAB.init(new Dictionary<string, string> {
             {OpenIAB.STORE_AMAZON, "c18a8ce946f646999c35b3da532aa9e3"},

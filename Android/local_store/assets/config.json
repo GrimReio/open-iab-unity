@@ -28,6 +28,30 @@
                 "sku_premium",
                 "sku_infinite_gas"
             ]
+        },
+        {
+            "packageName": "com.openiab.angrybots",
+            "version": "666",
+            "installed": "true",
+            "billingActive": "true",
+            "products": [
+                {
+                    "productId": "onepf.sku_ammo",
+                    "type": "inapp"
+                },
+                {
+                    "productId": "onepf.sku_medkit",
+                    "type": "inapp"
+                },
+                {
+                    "productId": "onepf.sku_cowboy_hat",
+                    "type": "inapp"
+                },
+                {
+                    "productId": "onepf.sku_infinite_ammo",
+                    "type": "subs"
+                }
+            ]
         }
     ]
 }
