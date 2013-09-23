@@ -67,6 +67,10 @@ namespace OpenIabPlugin {
             }
         }
 
+        public static void mapSku(string sku, string storeName, string storeSku) {
+            _plugin.Call("mapSku", sku, storeName, storeSku);
+        }
+
         // Unbinds and shuts down the billing service
         public static void unbindService() {
             if (Application.platform != RuntimePlatform.Android) {

@@ -52,6 +52,10 @@ public class OpenIAB {
         return _instance;
     }
 
+    public void mapSku(String sku, String storeName, String storeSku)  {
+        OpenIabHelper.mapSku(sku, storeName, storeSku);
+    }
+
     public void init(HashMap<String, String> storeKeys) {
         _helper = new OpenIabHelper(UnityPlayer.currentActivity, storeKeys);
         createBroadcasts();

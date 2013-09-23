@@ -50,7 +50,8 @@ public class BillingDemo : MonoBehaviour {
     }
 
     private void Start() {
-        //LoadData();
+        OpenIAB.mapSku(SKU_INFINITE_AMMO, OpenIAB.STORE_AMAZON, "sku_infinite_ammo");
+
         OpenIAB.init(new Dictionary<string, string> {
             {OpenIAB.STORE_AMAZON, "c18a8ce946f646999c35b3da532aa9e3"},
             {OpenIAB.STORE_GOOGLE, ""},
